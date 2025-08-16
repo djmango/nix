@@ -1,5 +1,5 @@
 {
-  description = "djmango NixOS: Neovim w/ my config, atuin, uv, zoxide, fd, cargo via rustup, SSH, wormhole";
+  description = "djmango NixOS: Neovim w/ my config, atuin, uv, zoxide, fd, cargo, SSH, wormhole";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
@@ -94,12 +94,6 @@
               enableBashIntegration = true;
               enableZshIntegration  = true;
               enableFishIntegration = true;
-            };
-
-            # Rust toolchain
-            programs.rustup = {
-              enable = true;
-              defaultToolchain = "stable";
             };
 
             # Extra packages
