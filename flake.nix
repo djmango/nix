@@ -37,6 +37,9 @@
       nixosConfigurations.${hostname} = nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
+          ./hardware-configuration.nix
+          ./configuration.nix
+
           home-manager.nixosModules.home-manager
           (
             { pkgs, ... }:
