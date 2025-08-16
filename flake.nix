@@ -1,5 +1,5 @@
 {
-  description = "djmango NixOS: Neovim w/ my config, atuin, uv, zoxide, fd, cargo, SSH, wormhole";
+  description = "djmango NixOS: Neovim w/ my config, atuin, uv, zoxide, fd, cargo, SSH, wormhole, ZeroTier";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
@@ -62,6 +62,8 @@
               environment.systemPackages = with pkgs; [
                 git
                 openssh
+zerotierone
+
               ];
 
               # OpenSSH server
@@ -75,6 +77,11 @@
                 };
               };
               networking.firewall.allowedTCPPorts = [ 22 ];
+
+              # ZeroTier service
+              services.zerotierone = {
+                enable = true;
+              };
 
               # Home Manager wiring
               home-manager.useGlobalPkgs = true;
