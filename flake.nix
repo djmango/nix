@@ -5,7 +5,10 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
     home-manager.url = "github:nix-community/home-manager/release-24.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    nvimcfg = { url = "github:djmango/dotfiles-nvim"; flake = false; };
+    nvimcfg = {
+      url = "github:djmango/dotfiles-nvim";
+      flake = false;
+    };
   };
 
   outputs =
@@ -56,12 +59,11 @@
                 ];
               };
 
-              # Core CLI tools at the system level
               environment.systemPackages = with pkgs; [
                 git
                 openssh
-zerotierone
-
+                zerotierone
+                htop
               ];
 
               # OpenSSH server
