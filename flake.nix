@@ -5,6 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
     home-manager.url = "github:nix-community/home-manager/release-24.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    nvimcfg = { url = "github:djmango/dotfiles-nvim"; flake = false; };
   };
 
   outputs =
@@ -12,6 +13,7 @@
       self,
       nixpkgs,
       home-manager,
+      nvimcfg,
       ...
     }:
     let
@@ -26,12 +28,7 @@
 
       lib = nixpkgs.lib;
 
-      # Your Neovim config repo (pin to a commit when you can).
-      nvimConfig = pkgs.fetchFromGitHub {
-        owner = "djmango";
-        repo = "dotfiles-nvim";
-        rev = "master";
-      };
+      nvimConfig = nvimcfg;
     in
     {
       nixosConfigurations.${hostname} = nixpkgs.lib.nixosSystem {
