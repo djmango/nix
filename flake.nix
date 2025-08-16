@@ -107,6 +107,10 @@
               uv
               fd
               magic-wormhole
+	      rustc
+              cargo
+              rust-analyzer
+              clippy
             ];
           };
         })
