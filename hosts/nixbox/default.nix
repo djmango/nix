@@ -2,12 +2,12 @@
 {
   networking.hostName = "nixbox";
 
-  # Pick one boot loader; adjust per machine as needed.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-  # If BIOS instead:
-  # boot.loader.grub.enable = true;
-  # boot.loader.grub.device = "/dev/sda";
+  # GRUB boot loader for BIOS/VM setup
+  boot.loader.grub.enable = true;
+  boot.loader.grub.device = "/dev/sda";
+  # If UEFI instead:
+  # boot.loader.systemd-boot.enable = true;
+  # boot.loader.efi.canTouchEfiVariables = true;
 
   users.users.${user} = {
     isNormalUser = true;
