@@ -46,7 +46,8 @@
                 "flakes"
               ];
 
-              # Optional: create the user
+              nixpkgs.config.allowUnfree = true;
+
               users.users.${myUser} = {
                 isNormalUser = true;
                 extraGroups = [ "wheel" ];
