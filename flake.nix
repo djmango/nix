@@ -1,5 +1,5 @@
 {
-  description = "NixOS: shared modules + per-host hardware (pure)";
+  description = "Nix configurations for NixOS and non-NixOS (standalone Home-Manager)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
@@ -11,6 +11,8 @@
   outputs = { self, nixpkgs, home-manager, nvimcfg, ... }:
   let
     system = "x86_64-linux";
+
+    # Function for NixOS configurations
     mkHost = host: user:
       nixpkgs.lib.nixosSystem {
         inherit system;
@@ -23,12 +25,33 @@
           ./hosts/${host}/default.nix
         ];
       };
+
+    # Function for standalone Home-Manager configurations (non-NixOS)
+    mkHome = user: homeDir:
+      home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.${system};
+        extraSpecialArgs = { inherit nvimcfg user; };  # pass to modules
+        modules = [
+          ./modules/home-common.nix
+          {
+            home.username = user;
+            home.homeDirectory = homeDir;
+            home.stateVersion = "24.05";
+          }
+        ];
+      };
   in {
-    # Define one entry per machine
+    # NixOS system configurations
     nixosConfigurations = {
       nixbox = mkHost "nixbox" "djmango";
       # laptop = mkHost "laptop" "djmango";
       # server = mkHost "server" "djmango";
+    };
+
+    # Standalone Home-Manager configurations for non-NixOS
+    homeConfigurations = {
+      djmango = mkHome "djmango" "/home/djmango";
+      root = mkHome "root" "/root";  # For root user on non-NixOS
     };
   };
 }
