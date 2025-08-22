@@ -7,7 +7,7 @@ A minimal, portable Home Manager setup that works across macOS and Linux (NixOS 
 Run this command on any supported machine:
 
 ```bash
-curl -L https://raw.githubusercontent.com/djmango/nix/main/setup.sh | sh
+curl -L https://raw.githubusercontent.com/djmango/nix/master/setup.sh | sh
 ```
 
 That's it! The script will:
@@ -79,7 +79,7 @@ home.packages = with pkgs; [
 
 ### First-Time Setup
 ```bash
-curl -L https://raw.githubusercontent.com/djmango/nix/main/setup.sh | sh
+curl -L https://raw.githubusercontent.com/djmango/nix/master/setup.sh | sh
 ```
 
 ### Update Configuration
@@ -104,7 +104,7 @@ home-manager switch --impure --flake ~/nix#default@$(uname -m)-$(uname -s | tr '
 ### User Detection Issues
 If the script can't detect your username:
 ```bash
-USER=yourname curl -L https://raw.githubusercontent.com/djmango/nix/main/setup.sh | sh
+USER=yourname curl -L https://raw.githubusercontent.com/djmango/nix/master/setup.sh | sh
 ```
 
 ### Package Conflicts (Linux)
