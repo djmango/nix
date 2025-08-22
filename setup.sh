@@ -56,10 +56,13 @@ else
 fi
 cd "$REPO_DIR"
 
+# Create home-manager configuration directory and symlink to flake
+mkdir -p ~/.config/home-manager
+cd ~/.config/home-manager
+ln -sf ~/nix/flake.nix .
+ln -sf ~/nix/flake.lock .
+
 # Apply config (with --impure to allow dynamic env var detection)
 echo "Applying Home Manager configuration..."
-home-manager switch --impure --flake .#default@${SYSTEM}
-
-echo "Setup complete! Your Home Manager environment is ready."
-echo "You can now use commands like: uv, fd, magic-wormhole, etc."
-echo "Your Neovim config is available at ~/.config/nvim"
+home-manager switch --impure --flake ~/nix#default@${SYSTEM}
+echo "Welcome home - skg"

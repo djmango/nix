@@ -29,30 +29,23 @@
 
   # Custom packages
   home.packages = with pkgs; [
-    # Development tools
-    uv                    # Fast Python package manager
-    ruff                  # Fast Python linter and formatter
-    fd                    # Fast file finder
-    rustc                 # Rust compiler
-    cargo                 # Rust package manager
-    rust-analyzer         # Rust language server
-    clippy                # Rust linter
-    git                   # Version control
-    gh                    # GitHub CLI
-    rclone 
-
-    # System utilities
-    htop                  # System monitor
-    magic-wormhole        # Secure file transfer
-
-    # Language servers and tools
-    nil                   # Nix language server
-    code2prompt           # Convert codebases to prompts for AI
-
-    # Editors and IDEs
-    zed-editor            # Zed code editor
-
-
+    uv # Fast Python package manager
+    ruff # Fast Python linter and formatter
+    fd # Fast file finder
+    rustc # Rust compiler
+    cargo # Rust package manager
+    rust-analyzer # Rust language server
+    clippy # Rust linter
+    git
+    gh
+    rclone
+    htop # System monitor
+    magic-wormhole # Secure file transfer
+    nil # Nix language server
+    nixd
+    code2prompt # Convert codebases to prompts for AI
+    zed-editor # Zed code editor
+    bun
   ];
 
   # Allow unfree packages
@@ -63,6 +56,5 @@
 
   # Add more program configs here, e.g.:
   # programs.zsh = { enable = true; /* aliases, etc. */ };
-
 
 }
