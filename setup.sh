@@ -45,7 +45,7 @@ fi
 
 # Clone/pull repo (assuming GitHub repo; adjust if using different git hosting)
 REPO_URL="https://github.com/djmango/nix.git"
-REPO_DIR=~/nix-config
+REPO_DIR=~/nix
 if [ ! -d "$REPO_DIR" ]; then
   echo "Cloning repository..."
   git clone "$REPO_URL" "$REPO_DIR"

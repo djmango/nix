@@ -19,21 +19,43 @@
   programs.atuin.enable = true;
   programs.zoxide.enable = true;
 
-  # Packages (add/edit here; these are user-installed and portable)
+  # programs.git = {
+  #   enable = true;
+  #   userName = "Your Name";
+  #   userEmail = "your.email@example.com";
+  # };
+
+  # Note: Cargo is installed as a package, no additional configuration needed
+
+  # Custom packages
   home.packages = with pkgs; [
-    uv
-    fd
-    magic-wormhole
-    rustc
-    cargo
-    rust-analyzer
-    clippy
-    # Example additions: git htop (uncomment/add as needed)
-    # git
-    # htop
+    # Development tools
+    uv                    # Fast Python package manager
+    ruff                  # Fast Python linter and formatter
+    fd                    # Fast file finder
+    rustc                 # Rust compiler
+    cargo                 # Rust package manager
+    rust-analyzer         # Rust language server
+    clippy                # Rust linter
+    git                   # Version control
+    gh                    # GitHub CLI
+    rclone 
+
+    # System utilities
+    htop                  # System monitor
+    magic-wormhole        # Secure file transfer
+
+    # Language servers and tools
+    nil                   # Nix language server
+    code2prompt           # Convert codebases to prompts for AI
+
+    # Editors and IDEs
+    zed-editor            # Zed code editor
+
+
   ];
 
-  # Allow unfree packages (e.g., for VS Code if you add it later)
+  # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
   # Optional: Platform-specific packages (add if needed)
@@ -41,4 +63,6 @@
 
   # Add more program configs here, e.g.:
   # programs.zsh = { enable = true; /* aliases, etc. */ };
+
+
 }

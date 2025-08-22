@@ -2,7 +2,7 @@
 
 A minimal, portable Home Manager setup that works across macOS and Linux (NixOS or non-NixOS) without hardcoding usernames, paths, or platform-specific configurations.
 
-## 🚀 Quick Start (One-Liner)
+## One-liner
 
 Run this command on any supported machine:
 
@@ -26,24 +26,6 @@ nix/
 └── modules/
     └── home-common.nix       # Your main config—add packages here
 ```
-
-## 🛠️ What's Included
-
-### Core Tools
-- **Neovim** with your custom config (`github:djmango/dotfiles-nvim`)
-- **Atuin** - shell history
-- **Zoxide** - smarter `cd` command
-- **Rust toolchain** - `rustc`, `cargo`, `rust-analyzer`, `clippy`
-- **UV** - fast Python package manager
-- **fd** - fast file finder
-- **magic-wormhole** - secure file transfer
-
-### Platform Support
-- ✅ **macOS** (Intel & Apple Silicon)
-- ✅ **Linux** (Ubuntu, Fedora, Arch, NixOS, etc.)
-- ✅ **ARM Linux** (Raspberry Pi, etc.)
-
-## 📝 Customization
 
 ### Adding Packages
 
@@ -108,23 +90,14 @@ curl -L https://raw.githubusercontent.com/djmango/nix/main/setup.sh | sh
 ### Manual Commands
 ```bash
 # Switch to your config (after setup)
-home-manager switch --impure --flake ~/nix-config#default@$(uname -m)-$(uname -s | tr '[:upper:]' '[:lower:]')
+home-manager switch --impure --flake ~/nix#default@$(uname -m)-$(uname -s | tr '[:upper:]' '[:lower:]')
 
 # Update flake dependencies
-cd ~/nix-config && nix flake update
+cd ~/nix && nix flake update
 
 # Apply changes with automatic backup
 home-manager switch --impure -b backup
 ```
-
-## 🎯 Supported Systems
-
-| System | Architecture | Support |
-| ------ | ------------ | ------- |
-| macOS  | x86_64       | ✅ Full  |
-| macOS  | aarch64      | ✅ Full  |
-| Linux  | x86_64       | ✅ Full  |
-| Linux  | aarch64      | ✅ Full  |
 
 ## 🐛 Troubleshooting
 
@@ -167,14 +140,3 @@ sudo chown -R $USER ~/.nix-profile
 - [Home Manager Manual](https://nix-community.github.io/home-manager/)
 - [Nix Pills](https://nixos.org/guides/nix-pills/) - learn Nix fundamentals
 - [NixOS Wiki](https://nixos.wiki/) - great resource for Nix/NixOS
-
-## 🤝 Contributing
-
-1. Fork this repository
-2. Make your changes in `modules/home-common.nix`
-3. Test on your target platforms
-4. Submit a pull request
-
-## 📄 License
-
-This configuration is provided as-is for personal use. Feel free to adapt it to your needs!

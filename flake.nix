@@ -2,8 +2,8 @@
   description = "Portable Home Manager config for packages and user settings";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
-    home-manager.url = "github:nix-community/home-manager/release-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    home-manager.url = "github:nix-community/home-manager/master";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     nvimcfg = { url = "github:djmango/dotfiles-nvim"; flake = false; };
   };
