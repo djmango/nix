@@ -1,8 +1,5 @@
 #!/bin/bash
 set -e
-
-
-
 # Detect system and arch (e.g., x86_64-darwin or aarch64-linux)
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m)
@@ -18,32 +15,44 @@ else
   echo "Error: Unsupported OS: $OS"
   exit 1
 fi
-
 echo "Detected system: $SYSTEM"
-
-# Install Nix if missing
+# Handle broken/partial Nix installs: Uninstall if /nix exists but nix not found
+if [ -d /nix ] && ! command -v nix >/dev/null 2>&1; then
+  echo "Detected partial Nix install; uninstalling first..."
+  /nix/nix-installer uninstall --no-confirm
+fi
+# Install Nix if missing or after uninstall
 if ! command -v nix >/dev/null 2>&1; then
-  echo "Installing Nix..."
-  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
-  . ~/.nix-profile/etc/profile.d/nix.sh
+  echo "Installing Nix via Determinate Systems..."
+  if [ "$OS" = "darwin" ]; then
+    curl -sSL https://install.determinate.systems/nix | sh -s -- install darwin --no-confirm
+  else
+    # Use wget for minimal Linux systems (avoids curl option issues)
+    if command -v wget >/dev/null 2>&1; then
+      wget -q -O- https://install.determinate.systems/nix | sh -s -- install linux --no-confirm --init none
+    else
+      curl -sSL https://install.determinate.systems/nix | sh -s -- install linux --no-confirm --init none
+    fi
+  fi
 fi
-
-# Enable flakes if not already
-mkdir -p ~/.config/nix
-if ! grep -q "experimental-features" ~/.config/nix/nix.conf 2>/dev/null; then
-  echo "Enabling Nix flakes..."
-  echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+# Source profile
+if [ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+  . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 fi
-
-# Install Home Manager if missing (standalone mode)
-if ! command -v home-manager >/dev/null 2>&1; then
-  echo "Installing Home Manager..."
-  nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
-  nix-channel --update
-  nix-shell '<home-manager>' -A install
+# Explicitly set PATH (fallback for shell issues)
+export PATH="/nix/var/nix/profiles/default/bin:$PATH"
+# Start Nix daemon if not running (for --init none)
+if ! ps aux | grep -q '[n]ix-daemon'; then
+  echo "Starting Nix daemon manually..."
+  /nix/var/nix/profiles/default/bin/nix-daemon --daemon &
+  sleep 5 # Give time for daemon to start
 fi
-
-# Clone/pull repo (assuming GitHub repo; adjust if using different git hosting)
+# Verify nix is available
+if ! command -v nix >/dev/null 2>&1; then
+  echo "Error: Nix installation failed - nix command not found after install."
+  exit 1
+fi
+# Clone/pull repo
 REPO_URL="https://github.com/djmango/nix.git"
 REPO_DIR=~/nix
 if [ ! -d "$REPO_DIR" ]; then
@@ -55,14 +64,22 @@ else
   git pull
 fi
 cd "$REPO_DIR"
-
-# Create home-manager configuration directory and symlink to flake
-mkdir -p ~/.config/home-manager
-cd ~/.config/home-manager
-ln -sf ~/nix/flake.nix .
-ln -sf ~/nix/flake.lock .
-
-# Apply config (with --impure to allow dynamic env var detection)
-echo "Applying Home Manager configuration..."
-home-manager switch --impure --flake ~/nix#default@${SYSTEM}
+# Install/Apply Home Manager (bootstrap with nix run if not installed)
+FLAKE_PATH="$REPO_DIR#default@${SYSTEM}"
+if ! command -v home-manager >/dev/null 2>&1; then
+  echo "Bootstrapping Home Manager via flake..."
+  nix run github:nix-community/home-manager/release-24.05 -- switch --flake "$FLAKE_PATH" --impure
+else
+  echo "Applying Home Manager configuration..."
+  home-manager switch --impure --flake "$FLAKE_PATH"
+fi
+# Change default shell to zsh if not already (requires zsh installed via Home Manager)
+ZSH_PATH="$HOME/.nix-profile/bin/zsh"
+if [ -x "$ZSH_PATH" ] && [ "$SHELL" != "$ZSH_PATH" ]; then
+  echo "Changing default shell to zsh..."
+  chsh -s "$ZSH_PATH"
+  echo "Default shell changed to zsh. Log out and log back in, or run 'exec zsh' to start using it immediately."
+else
+  echo "Shell is already zsh or zsh not found."
+fi
 echo "Welcome home - skg"

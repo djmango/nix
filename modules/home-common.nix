@@ -6,6 +6,9 @@
   # Disable version mismatch warnings (we manage versions explicitly in flake.nix)
   home.enableNixpkgsReleaseCheck = false;
 
+  # Disable Home Manager news notifications
+  news.display = "silent";
+
   # Core programs and configs
   programs.neovim = {
     enable = true;
@@ -76,16 +79,25 @@
       set -g message-style "fg=yellow,bg=red,bold"
     '';
   };
-
-  # programs.git = {
-  #   enable = true;
-  #   userName = "Your Name";
-  #   userEmail = "your.email@example.com";
-  # };
-
-  # Note: Cargo is installed as a package, no additional configuration needed
-
-  # Custom packages
+  programs.zsh = {
+    enable = true;
+    oh-my-zsh = {
+      enable = true;
+      plugins = [
+        "git"
+        "docker"
+        "rust"
+        "python"
+      ];
+      theme = "robbyrussell";
+    };
+    initExtra = ''
+      # Additional zsh init (e.g., for Atuin or custom aliases)
+      export PATH="$HOME/.nix-profile/bin:$PATH"
+      . "$HOME/.atuin/bin/env"
+      eval "$(atuin init zsh)"
+    '';
+  };
   home.packages = with pkgs; [
 bun cargo clippy code2prompt fd gh
 
@@ -102,8 +114,4 @@ ruff rust-analyzer rustc tmux uv zed-editor
 
   # Optional: Platform-specific packages (add if needed)
   # home.packages = with pkgs; home.packages ++ (if stdenv.isDarwin then [ /* macOS-only */ ] else [ /* Linux-only */ ]);
-
-  # Add more program configs here, e.g.:
-  # programs.zsh = { enable = true; /* aliases, etc. */ };
-
 }

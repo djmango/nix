@@ -15,6 +15,7 @@ That's it! The script will:
 - Install Nix and Home Manager if missing
 - Clone/pull your config repository
 - Apply your Home Manager configuration
+- Set up Zsh with Oh My Zsh as the default shell
 
 ## 📁 Repository Structure
 
