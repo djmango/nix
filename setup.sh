@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# curl -L https://raw.githubusercontent.com/djmango/nix/master/setup.sh | sh
+# OR
+# curl -L https://nix.skg.gg | sh
+
 set -e
 
 # Detect system and arch (e.g., x86_64-darwin or aarch64-linux)
