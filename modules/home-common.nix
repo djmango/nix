@@ -23,6 +23,7 @@
     cargo
     clippy
     code2prompt
+    direnv
     dotslash
     fd
     gh
