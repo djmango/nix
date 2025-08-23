@@ -94,7 +94,7 @@
     };
     initContent = ''
       #DJMANGOFLAG
-      start=$(gdate +%s%3N)
+      # start=$(gdate +%s%3N)
       export PATH="$HOME/.nix-profile/bin:$PATH"
       eval "$(atuin init zsh)"
       eval "$(direnv hook zsh)"
@@ -109,8 +109,8 @@
         . ~/.zshrc.local
       fi
 
-      end=$(gdate +%s%3N)
-      echo "Shell load time: $((end-start))ms"
+      # end=$(gdate +%s%3N)
+      # echo "Shell load time: $((end-start))ms"
     '';
     envExtra = ''
       #DJMANGOFLAG
