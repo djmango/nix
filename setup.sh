@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+
 # Detect system and arch (e.g., x86_64-darwin or aarch64-linux)
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m)
@@ -21,6 +22,7 @@ if [ -d /nix ] && ! command -v nix >/dev/null 2>&1; then
   echo "Detected partial Nix install; uninstalling first..."
   /nix/nix-installer uninstall --no-confirm
 fi
+
 # Install Nix if missing or after uninstall
 if ! command -v nix >/dev/null 2>&1; then
   echo "Installing Nix via Determinate Systems..."
@@ -35,6 +37,7 @@ if ! command -v nix >/dev/null 2>&1; then
     fi
   fi
 fi
+
 # Source profile
 if [ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
   . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
@@ -52,6 +55,7 @@ if ! command -v nix >/dev/null 2>&1; then
   echo "Error: Nix installation failed - nix command not found after install."
   exit 1
 fi
+
 # Clone/pull repo
 REPO_URL="https://github.com/djmango/nix.git"
 REPO_DIR=~/nix
@@ -64,6 +68,17 @@ else
   git pull
 fi
 cd "$REPO_DIR"
+
+# Backup .zshrc if it exists
+if [ -f ~/.zshrc ]; then
+  mv ~/.zshrc ~/.zshrc.local
+fi
+
+# Backup .zshenv if it exists (even if cat didn't find it in the current dir, it might exist in ~)
+if [ -f ~/.zshenv ]; then
+  mv ~/.zshenv ~/.zshenv.local
+fi
+
 # Install/Apply Home Manager (bootstrap with nix run if not installed)
 FLAKE_PATH="$REPO_DIR#default@${SYSTEM}"
 if ! command -v home-manager >/dev/null 2>&1; then

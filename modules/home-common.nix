@@ -91,22 +91,44 @@
       ];
       theme = "robbyrussell";
     };
-    initExtra = ''
+    initContent = ''
       # Additional zsh init (e.g., for Atuin or custom aliases)
       export PATH="$HOME/.nix-profile/bin:$PATH"
       . "$HOME/.atuin/bin/env"
       eval "$(atuin init zsh)"
+
+      # Source local rc file if it exists (preserves your old ~/.zshrc)
+      if [ -f ~/.zshrc.local ]; then
+        . ~/.zshrc.local
+      fi
+    '';
+    envExtra = ''
+      # Source local env file if it exists (preserves your old ~/.zshenv)
+      if [ -f ~/.zshenv.local ]; then
+        . ~/.zshenv.local
+      fi
     '';
   };
   home.packages = with pkgs; [
-bun cargo clippy code2prompt fd gh
-
+    bun
+    cargo
+    clippy
+    code2prompt
+    fd
+    gh
     git
-htop magic-wormhole nil nixd nixfmt
-
+    htop
+    magic-wormhole
+    nil
+    nixd
+    nixfmt
     rclone
-ruff rust-analyzer rustc tmux uv zed-editor
-
+    ruff
+    rust-analyzer
+    rustc
+    tmux
+    uv
+    zed-editor
   ];
 
   # Allow unfree packages
