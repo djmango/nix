@@ -69,13 +69,13 @@ else
 fi
 cd "$REPO_DIR"
 
-# Backup .zshrc if it exists
-if [ -f ~/.zshrc ]; then
+# Backup .zshrc if it exists and doesn't already have a local backup, and doens't have the #DJMANGOFLAG
+if [ -f ~/.zshrc ] && [ ! -f ~/.zshrc.local ] && ! grep -q "#DJMANGOFLAG" ~/.zshrc; then
   mv ~/.zshrc ~/.zshrc.local
 fi
 
-# Backup .zshenv if it exists (even if cat didn't find it in the current dir, it might exist in ~)
-if [ -f ~/.zshenv ]; then
+# Backup .zshenv if it exists and doesn't already have a local backup, and doens't have the #DJMANGOFLAG
+if [ -f ~/.zshenv ] && [ ! -f ~/.zshenv.local ] && ! grep -q "#DJMANGOFLAG" ~/.zshenv; then
   mv ~/.zshenv ~/.zshenv.local
 fi
 
@@ -83,10 +83,10 @@ fi
 FLAKE_PATH="$REPO_DIR#default@${SYSTEM}"
 if ! command -v home-manager >/dev/null 2>&1; then
   echo "Bootstrapping Home Manager via flake..."
-  nix run github:nix-community/home-manager/release-24.05 -- switch --flake "$FLAKE_PATH" --impure
+  nix run github:nix-community/home-manager/release-24.05 -- switch -b backup --flake "$FLAKE_PATH" --impure
 else
   echo "Applying Home Manager configuration..."
-  home-manager switch --impure --flake "$FLAKE_PATH"
+  home-manager switch -b backup --impure --flake "$FLAKE_PATH" 
 fi
 # Change default shell to zsh if not already (requires zsh installed via Home Manager)
 ZSH_PATH="$HOME/.nix-profile/bin/zsh"

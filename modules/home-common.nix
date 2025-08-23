@@ -79,6 +79,7 @@
       set -g message-style "fg=yellow,bg=red,bold"
     '';
   };
+
   programs.zsh = {
     enable = true;
     oh-my-zsh = {
@@ -92,10 +93,13 @@
       theme = "robbyrussell";
     };
     initContent = ''
-      # Additional zsh init (e.g., for Atuin or custom aliases)
+      #DJMANGOFLAG
       export PATH="$HOME/.nix-profile/bin:$PATH"
       . "$HOME/.atuin/bin/env"
       eval "$(atuin init zsh)"
+
+      alias x="explorer"
+      alias k="kubectl"
 
       # Source local rc file if it exists (preserves your old ~/.zshrc)
       if [ -f ~/.zshrc.local ]; then
@@ -103,6 +107,7 @@
       fi
     '';
     envExtra = ''
+      #DJMANGOFLAG
       # Source local env file if it exists (preserves your old ~/.zshenv)
       if [ -f ~/.zshenv.local ]; then
         . ~/.zshenv.local
