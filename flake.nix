@@ -5,10 +5,9 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager/master";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    nvimcfg = { url = "github:djmango/dotfiles-nvim"; flake = false; };
   };
 
-  outputs = { self, nixpkgs, home-manager, nvimcfg, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, ... }@inputs:
   let
     # Supported systems (add more if needed, e.g., aarch64-linux for ARM Linux)
     systems = [
@@ -22,7 +21,6 @@
     mkHome = system:
       home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.${system};
-        extraSpecialArgs = { inherit nvimcfg; };  # Pass nvimcfg if needed in modules
         modules = [
           ./modules/home-common.nix
           ({ pkgs, config, ... }: {
