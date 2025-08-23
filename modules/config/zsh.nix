@@ -58,6 +58,6 @@
   # Install required packages for powerlevel10k
   home.packages = with pkgs; [
     # Recommended fonts for powerlevel10k
-    (nerdfonts.override { fonts = [ "MesloLGS" ]; })
+    nerd-fonts.meslo-lg
   ];
 }
