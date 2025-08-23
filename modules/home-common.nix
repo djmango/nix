@@ -100,6 +100,7 @@
       eval "$(direnv hook zsh)"
       eval "$(zoxide init --cmd cd zsh)"
 
+      alias npkg="nix search nixpkgs"
       alias gw="gh repo view -w"
       alias x="explorer"
       alias k="kubectl"
@@ -125,9 +126,11 @@
     cargo
     clippy
     code2prompt
+    dotslash
     fd
     gh
     git
+    git-lfs
     htop
     magic-wormhole
     nil
