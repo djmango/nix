@@ -43,8 +43,8 @@
         . ~/.zshrc.local
       fi
 
-      # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-      [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+      # Load our managed p10k configuration
+      source ${./p10k.zsh}
     '';
     envExtra = ''
       #DJMANGOFLAG
