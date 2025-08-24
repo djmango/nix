@@ -4,6 +4,7 @@
     ./config/atuin.nix
     ./config/neovim.nix
     ./config/tmux.nix
+    ./config/zoxide.nix
     ./config/zsh.nix
   ];
 
@@ -16,14 +17,14 @@
   # Disable Home Manager news notifications
   news.display = "silent";
 
+  programs.direnv.enable = true;
+
   # Core programs
-  programs.zoxide.enable = true;
   home.packages = with pkgs; [
     bun
     cargo
     clippy
     code2prompt
-    direnv
     dotslash
     fd
     gh

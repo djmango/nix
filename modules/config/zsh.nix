@@ -29,9 +29,6 @@
       fi
 
       export PATH="$HOME/.nix-profile/bin:$PATH"
-      eval "$(atuin init zsh)"
-      eval "$(direnv hook zsh)"
-      eval "$(zoxide init --cmd cd zsh)"
 
       alias npkg="nix search nixpkgs"
       alias gw="gh repo view -w"
