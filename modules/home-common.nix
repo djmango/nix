@@ -1,6 +1,7 @@
 { pkgs, ... }:
 {
   imports = [
+    ./config/atuin.nix
     ./config/neovim.nix
     ./config/tmux.nix
     ./config/zsh.nix
@@ -16,7 +17,6 @@
   news.display = "silent";
 
   # Core programs
-  programs.atuin.enable = true;
   programs.zoxide.enable = true;
   home.packages = with pkgs; [
     bun

@@ -22,6 +22,7 @@ else
   exit 1
 fi
 echo "Detected system: $SYSTEM"
+
 # Handle broken/partial Nix installs: Uninstall if /nix exists but nix not found
 if [ -d /nix ] && ! command -v nix >/dev/null 2>&1; then
   echo "Detected partial Nix install; uninstalling first..."
@@ -32,7 +33,9 @@ fi
 if ! command -v nix >/dev/null 2>&1; then
   echo "Installing Nix via Determinate Systems..."
   if [ "$OS" = "darwin" ]; then
-    curl -sSL https://install.determinate.systems/nix | sh -s -- install darwin --no-confirm
+    # curl -sSL https://install.determinate.systems/nix | sh -s -- install darwin --no-confirm
+    echo Try our macOS-native package instead, which can handle almost anything:
+    echo https://dtr.mn/determinate-nix
   else
     # Use wget for minimal Linux systems (avoids curl option issues)
     if command -v wget >/dev/null 2>&1; then
