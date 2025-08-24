@@ -37,11 +37,18 @@ if ! command -v nix >/dev/null 2>&1; then
     echo Try our macOS-native package instead, which can handle almost anything:
     echo https://dtr.mn/determinate-nix
   else
+    USED_INIT_NONE=0
+    INIT_OPT=""
+    if ! command -v systemctl >/dev/null 2>&1; then
+      echo "No systemd detected; using --init none for installation."
+      INIT_OPT="--init none"
+      USED_INIT_NONE=1
+    fi
     # Use wget for minimal Linux systems (avoids curl option issues)
     if command -v wget >/dev/null 2>&1; then
-      wget -q -O- https://install.determinate.systems/nix | sh -s -- install linux --no-confirm --init none
+      wget -q -O- https://install.determinate.systems/nix | sh -s -- install linux --no-confirm $INIT_OPT
     else
-      curl -sSL https://install.determinate.systems/nix | sh -s -- install linux --no-confirm --init none
+      curl -sSL https://install.determinate.systems/nix | sh -s -- install linux --no-confirm $INIT_OPT
     fi
   fi
 fi
@@ -52,11 +59,15 @@ if [ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
 fi
 # Explicitly set PATH (fallback for shell issues)
 export PATH="/nix/var/nix/profiles/default/bin:$PATH"
-# Start Nix daemon if not running (for --init none)
-if ! ps aux | grep -q '[n]ix-daemon'; then
-  echo "Starting Nix daemon manually..."
-  /nix/var/nix/profiles/default/bin/nix-daemon --daemon &
+# Start Nix daemon if not running and we used --init none (manual start required)
+if [ "${USED_INIT_NONE:-0}" -eq 1 ] && ! ps aux | grep -q '[n]ix-daemon'; then
+  echo "Starting Nix daemon manually with sudo (since no init system)..."
+  sudo /nix/var/nix/profiles/default/bin/nix-daemon --daemon &
   sleep 5 # Give time for daemon to start
+  if ! ps aux | grep -q '[n]ix-daemon'; then
+    echo "Error: Failed to start nix-daemon. Check sudo access or logs."
+    exit 1
+  fi
 fi
 # Verify nix is available
 if ! command -v nix >/dev/null 2>&1; then
@@ -77,12 +88,11 @@ else
 fi
 cd "$REPO_DIR"
 
-# Backup .zshrc if it exists and doesn't already have a local backup, and doens't have the #DJMANGOFLAG
+# Backup .zshrc if it exists and doesn't already have a local backup, and doesn't have the #DJMANGOFLAG
 if [ -f ~/.zshrc ] && [ ! -f ~/.zshrc.local ] && ! grep -q "#DJMANGOFLAG" ~/.zshrc; then
   mv ~/.zshrc ~/.zshrc.local
 fi
-
-# Backup .zshenv if it exists and doesn't already have a local backup, and doens't have the #DJMANGOFLAG
+# Backup .zshenv if it exists and doesn't already have a local backup, and doesn't have the #DJMANGOFLAG
 if [ -f ~/.zshenv ] && [ ! -f ~/.zshenv.local ] && ! grep -q "#DJMANGOFLAG" ~/.zshenv; then
   mv ~/.zshenv ~/.zshenv.local
 fi
@@ -94,8 +104,9 @@ if ! command -v home-manager >/dev/null 2>&1; then
   nix run github:nix-community/home-manager/release-24.05 -- switch -b backup --flake "$FLAKE_PATH" --impure
 else
   echo "Applying Home Manager configuration..."
-  home-manager switch -b backup --impure --flake "$FLAKE_PATH" 
+  home-manager switch -b backup --impure --flake "$FLAKE_PATH"
 fi
+
 # Change default shell to zsh if not already (requires zsh installed via Home Manager)
 ZSH_PATH="$HOME/.nix-profile/bin/zsh"
 if [ -x "$ZSH_PATH" ] && [ "$SHELL" != "$ZSH_PATH" ]; then
@@ -105,4 +116,5 @@ if [ -x "$ZSH_PATH" ] && [ "$SHELL" != "$ZSH_PATH" ]; then
 else
   echo "Shell is already zsh or zsh not found."
 fi
+
 echo "Welcome home - skg"
