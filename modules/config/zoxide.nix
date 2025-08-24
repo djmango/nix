@@ -3,7 +3,7 @@
   programs.zoxide = {
     enable = true;
     enableZshIntegration = true;
-    flags = [
+    options = [
       "--cmd cd"
     ];
   };
