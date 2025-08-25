@@ -39,8 +39,19 @@ if ! command -v nix >/dev/null 2>&1; then
   else
     USED_INIT_NONE=0
     INIT_OPT=""
-    if ! command -v systemctl >/dev/null 2>&1; then
-      echo "No systemd detected; using --init none for installation."
+
+    # Better systemd detection: check if systemctl exists AND systemd is active
+    if command -v systemctl >/dev/null 2>&1; then
+      # systemctl exists, now check if systemd is actually running
+      if systemctl is-system-running >/dev/null 2>&1; then
+        echo "systemd detected and active; using standard installation."
+      else
+        echo "systemctl found but systemd not active; using --init none for installation."
+        INIT_OPT="--init none"
+        USED_INIT_NONE=1
+      fi
+    else
+      echo "No systemctl command found; using --init none for installation."
       INIT_OPT="--init none"
       USED_INIT_NONE=1
     fi
@@ -57,18 +68,30 @@ fi
 if [ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
   . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 fi
+
 # Explicitly set PATH (fallback for shell issues)
 export PATH="/nix/var/nix/profiles/default/bin:$PATH"
+
 # Start Nix daemon if not running and we used --init none (manual start required)
 if [ "${USED_INIT_NONE:-0}" -eq 1 ] && ! ps aux | grep -q '[n]ix-daemon'; then
-  echo "Starting Nix daemon manually with sudo (since no init system)..."
-  sudo /nix/var/nix/profiles/default/bin/nix-daemon --daemon &
+  if [ "$(id -u)" -eq 0 ]; then
+    echo "Starting Nix daemon manually (running as root, no sudo needed)..."
+    /nix/var/nix/profiles/default/bin/nix-daemon --daemon &
+  else
+    echo "Starting Nix daemon manually with sudo (since no init system)..."
+    sudo /nix/var/nix/profiles/default/bin/nix-daemon --daemon &
+  fi
   sleep 5 # Give time for daemon to start
   if ! ps aux | grep -q '[n]ix-daemon'; then
-    echo "Error: Failed to start nix-daemon. Check sudo access or logs."
+    if [ "$(id -u)" -eq 0 ]; then
+      echo "Error: Failed to start nix-daemon. Check logs."
+    else
+      echo "Error: Failed to start nix-daemon. Check sudo access or logs."
+    fi
     exit 1
   fi
 fi
+
 # Verify nix is available
 if ! command -v nix >/dev/null 2>&1; then
   echo "Error: Nix installation failed - nix command not found after install."
