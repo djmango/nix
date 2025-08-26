@@ -11,7 +11,6 @@
         + "$git_state"
         + "$git_metrics"
         + "$git_status"
-        + "$package"
         + "$jobs"
         + "$status"
         + "$character";
