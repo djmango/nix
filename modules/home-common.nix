@@ -38,6 +38,7 @@
     dotslash
     eza
     fd
+    ffmpeg
     gh
     git
     git-lfs
