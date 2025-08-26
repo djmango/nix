@@ -13,6 +13,13 @@
       if test -f ~/.config/fish/fish.local
         source ~/.config/fish/fish.local
       end
+      
+      # On darwin, and if homebrew is installed, setup homebrew path
+      if test (uname) = "Darwin"
+        if test -d /opt/homebrew/bin
+          eval "$(/opt/homebrew/bin/brew shellenv)"
+        end
+      end
 
       fish_vi_key_bindings
       bind -M insert \t accept-autosuggestion or complete

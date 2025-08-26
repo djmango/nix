@@ -34,8 +34,6 @@
   home.packages = with pkgs; [
     bat
     bun
-    cargo
-    clippy
     code2prompt
     dotslash
     eza
@@ -50,9 +48,9 @@
     nixd
     nixfmt
     rclone
+    rsync
     ruff
-    rust-analyzer
-    rustc
+    rustup
     tmux
     uv
     zed-editor
