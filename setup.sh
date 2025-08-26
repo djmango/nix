@@ -6,6 +6,12 @@
 
 set -e
 
+# Check if running as root
+IS_ROOT=false
+if [ "$(id -u)" -eq 0 ]; then
+  IS_ROOT=true
+fi
+
 # Detect system and arch (e.g., x86_64-darwin or aarch64-linux)
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m)
@@ -26,7 +32,7 @@ echo "Detected system: $SYSTEM"
 # Handle broken/partial Nix installs: Uninstall if /nix exists but nix not found
 if [ -d /nix ] && ! command -v nix >/dev/null 2>&1; then
   echo "Detected partial Nix install; uninstalling first..."
-  /nix/nix-installer uninstall --no-confirm
+  /nix/nix-installer uninstall
 fi
 
 # Install Nix if missing or after uninstall
@@ -74,7 +80,7 @@ export PATH="/nix/var/nix/profiles/default/bin:$PATH"
 
 # Start Nix daemon if not running and we used --init none (manual start required)
 if [ "${USED_INIT_NONE:-0}" -eq 1 ] && ! ps aux | grep -q '[n]ix-daemon'; then
-  if [ "$(id -u)" -eq 0 ]; then
+  if [ "$IS_ROOT" = true ]; then
     echo "Starting Nix daemon manually (running as root, no sudo needed)..."
     /nix/var/nix/profiles/default/bin/nix-daemon --daemon &
   else
@@ -83,7 +89,7 @@ if [ "${USED_INIT_NONE:-0}" -eq 1 ] && ! ps aux | grep -q '[n]ix-daemon'; then
   fi
   sleep 5 # Give time for daemon to start
   if ! ps aux | grep -q '[n]ix-daemon'; then
-    if [ "$(id -u)" -eq 0 ]; then
+    if [ "$IS_ROOT" = true ]; then
       echo "Error: Failed to start nix-daemon. Check logs."
     else
       echo "Error: Failed to start nix-daemon. Check sudo access or logs."
@@ -111,15 +117,6 @@ else
 fi
 cd "$REPO_DIR"
 
-# Backup .zshrc if it exists and doesn't already have a local backup, and doesn't have the #DJMANGOFLAG
-if [ -f ~/.zshrc ] && [ ! -f ~/.zshrc.local ] && ! grep -q "#DJMANGOFLAG" ~/.zshrc; then
-  mv ~/.zshrc ~/.zshrc.local
-fi
-# Backup .zshenv if it exists and doesn't already have a local backup, and doesn't have the #DJMANGOFLAG
-if [ -f ~/.zshenv ] && [ ! -f ~/.zshenv.local ] && ! grep -q "#DJMANGOFLAG" ~/.zshenv; then
-  mv ~/.zshenv ~/.zshenv.local
-fi
-
 # Install/Apply Home Manager (bootstrap with nix run if not installed)
 FLAKE_PATH="$REPO_DIR#default@${SYSTEM}"
 if ! command -v home-manager >/dev/null 2>&1; then
@@ -130,14 +127,39 @@ else
   home-manager switch -b backup --impure --flake "$FLAKE_PATH"
 fi
 
-# Change default shell to zsh if not already (requires zsh installed via Home Manager)
-ZSH_PATH="$HOME/.nix-profile/bin/zsh"
-if [ -x "$ZSH_PATH" ] && [ "$SHELL" != "$ZSH_PATH" ]; then
-  echo "Changing default shell to zsh..."
-  chsh -s "$ZSH_PATH"
-  echo "Default shell changed to zsh. Log out and log back in, or run 'exec zsh' to start using it immediately."
+# Change default shell to fish if not already
+FISH_PATH="$HOME/.nix-profile/bin/fish"
+if [ -x "$FISH_PATH" ]; then
+  if [ "$SHELL" = "$FISH_PATH" ]; then
+    echo "Shell is already set to fish."
+  else
+    # Check if fish is in /etc/shells, add it if not
+    if ! grep -q "^$FISH_PATH$" /etc/shells 2>/dev/null; then
+      echo "Adding fish to /etc/shells..."
+      if [ "$IS_ROOT" = true ]; then
+        echo "$FISH_PATH" >> /etc/shells
+      else
+        echo "$FISH_PATH" | sudo tee -a /etc/shells > /dev/null
+      fi
+    fi
+
+    echo "Changing default shell to fish..."
+    if [ "$IS_ROOT" = true ]; then
+      if chsh -s "$FISH_PATH" || [ "$SHELL" = "$FISH_PATH" ]; then
+        echo "Default shell changed to fish. Log out and log back in, or run 'exec fish' to start using it immediately."
+      else
+        echo "Error: Failed to change shell to fish."
+      fi
+    else
+      if sudo chsh -s "$FISH_PATH" || [ "$SHELL" = "$FISH_PATH" ]; then
+        echo "Default shell changed to fish. Log out and log back in, or run 'exec fish' to start using it immediately."
+      else
+        echo "Error: Failed to change shell to fish. You may need to enter your password or check permissions."
+      fi
+    fi
+  fi
 else
-  echo "Shell is already zsh or zsh not found."
+  echo "Fish shell not found at $FISH_PATH. Make sure Home Manager has installed fish."
 fi
 
 echo "Welcome home - skg"

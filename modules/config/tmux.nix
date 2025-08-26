@@ -42,7 +42,8 @@
       set -g status-left ""
       set -g status-left-length 10
 
-      set -g status-right "#[fg=black,bg=yellow] %Y-%m-%d %H:%M "
+set - g status-right "#[fg=black,bg=yellow] %Y-%m-%d %I:%M %p "
+
       set -g status-right-length 50
 
       set-option -g window-status-current-style "fg=black,bg=red"
