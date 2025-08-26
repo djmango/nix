@@ -15,6 +15,9 @@
         + "$status"
         + "$character";
 
+      right_format = "$cmd_duration"
+        + "$time";
+
       add_newline = false;
 
       username = {
@@ -59,6 +62,18 @@
         vimcmd_replace_symbol = "[❮](purple)";
         vimcmd_replace_one_symbol = "[❮](purple)";
         vimcmd_visual_symbol = "[❮](yellow)";
+      };
+
+      cmd_duration = {
+        format = "[$duration]($style) ";
+        style = "purple";
+      };
+
+      time = {
+        disabled = false;
+        format = "[$time]($style) ";
+        style = "#6C6C6C";
+        use_12hr = true;
       };
 
       aws.symbol = "  ";
