@@ -5,7 +5,7 @@
     ./config/neovim.nix
     ./config/tmux.nix
     ./config/zoxide.nix
-    ./config/zsh.nix
+    ./config/fish.nix
   ];
 
   # Enable Home Manager to manage itself
@@ -21,16 +21,19 @@
 
   # Core programs
   home.packages = with pkgs; [
+    bat
     bun
     cargo
     clippy
     code2prompt
     dotslash
+    exa
     fd
     gh
     git
     git-lfs
     htop
+    jq
     magic-wormhole
     nil
     nixd

@@ -1,0 +1,319 @@
+# Basic Starship configuration
+# This is a minimal setup that you can customize interactively
+# Run: starship init fish --print-full-init | source
+# Then: starship config
+
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Use custom format
+format = """
+$username\
+$hostname\
+$localipv4\
+$shlvl\
+$singularity\
+$directory\
+$vcsh\
+$git_branch\
+$git_commit\
+$git_state\
+$git_metrics\
+$git_status\
+$hg_branch\
+$docker_context\
+$package\
+$buf\
+$cmake\
+$cobol\
+$container\
+$daml\
+$dart\
+$deno\
+$dotnet\
+$elixir\
+$elm\
+$erlang\
+$golang\
+$gradle\
+$haskell\
+$helm\
+$java\
+$julia\
+$kotlin\
+$lua\
+$nim\
+$nodejs\
+$ocaml\
+$perl\
+$php\
+$pulumi\
+$purescript\
+$python\
+$raku\
+$rlang\
+$ruby\
+$rust\
+$scala\
+$swift\
+$terraform\
+$typst\
+$vagrant\
+$zig\
+$nix_shell\
+$conda\
+$memory_usage\
+$aws\
+$gcloud\
+$openstack\
+$azure\
+$env_var\
+$crystal\
+$custom\
+$sudo\
+$cmd_duration\
+$line_break\
+$jobs\
+$time\
+$status\
+$os\
+$container\
+$shell\
+$character"""
+
+# Disable the blank line at the start of the prompt
+add_newline = false
+
+# You can override some of the default values
+[username]
+style_user = "green bold"
+style_root = "red bold"
+format = "[$user]($style) "
+disabled = false
+show_always = true
+
+[hostname]
+ssh_symbol = " "
+ssh_only = false
+format = "on [$hostname](bold red) "
+disabled = false
+
+[directory]
+read_only = " 󰌾"
+truncation_length = 3
+truncation_symbol = "…/"
+home_symbol = "~"
+use_logical_path = true
+
+[git_branch]
+symbol = " "
+truncation_length = 4
+truncation_symbol = "…/"
+ignore_branches = ["master", "main"]
+
+[time]
+disabled = false
+format = "🕙 $time($style) "
+time_format = "%T"
+utc_time_offset = "local"
+
+[status]
+symbol = "✗"
+not_executable_symbol = "🚫"
+not_found_symbol = "🔍"
+sigint_symbol = "🧱"
+signal_symbol = "⚡"
+success_symbol = ""
+format = "$symbol$status($style) "
+map_symbol = true
+disabled = false
+
+[character]
+success_symbol = "[❯](green)"
+error_symbol = "[❯](red)"
+vimcmd_symbol = "[❮](green)"
+vimcmd_replace_symbol = "[❮](purple)"
+vimcmd_replace_one_symbol = "[❮](purple)"
+vimcmd_visual_symbol = "[❮](yellow)"
+
+[aws]
+symbol = "  "
+
+[buf]
+symbol = " "
+
+[bun]
+symbol = " "
+
+[c]
+symbol = " "
+
+[cpp]
+symbol = " "
+
+[cmake]
+symbol = " "
+
+[conda]
+symbol = " "
+
+[crystal]
+symbol = " "
+
+[dart]
+symbol = " "
+
+[deno]
+symbol = " "
+
+[docker_context]
+symbol = " "
+
+[elixir]
+symbol = " "
+
+[elm]
+symbol = " "
+
+[fennel]
+symbol = " "
+
+[fossil_branch]
+symbol = " "
+
+[gcloud]
+symbol = "  "
+
+[git_commit]
+tag_symbol = '  '
+
+[golang]
+symbol = " "
+
+[guix_shell]
+symbol = " "
+
+[haskell]
+symbol = " "
+
+[haxe]
+symbol = " "
+
+[hg_branch]
+symbol = " "
+
+[java]
+symbol = " "
+
+[julia]
+symbol = " "
+
+[kotlin]
+symbol = " "
+
+[lua]
+symbol = " "
+
+[memory_usage]
+symbol = "󰍛 "
+
+[meson]
+symbol = "󰔷 "
+
+[nim]
+symbol = "󰆥 "
+
+[nix_shell]
+symbol = " "
+
+[nodejs]
+symbol = " "
+
+[ocaml]
+symbol = " "
+
+[os.symbols]
+Alpaquita = " "
+Alpine = " "
+AlmaLinux = " "
+Amazon = " "
+Android = " "
+Arch = " "
+Artix = " "
+CachyOS = " "
+CentOS = " "
+Debian = " "
+DragonFly = " "
+Emscripten = " "
+EndeavourOS = " "
+Fedora = " "
+FreeBSD = " "
+Garuda = "󰛓 "
+Gentoo = " "
+HardenedBSD = "󰞌 "
+Illumos = "󰈸 "
+Kali = " "
+Linux = " "
+Mabox = " "
+Macos = " "
+Manjaro = " "
+Mariner = " "
+MidnightBSD = " "
+Mint = " "
+NetBSD = " "
+NixOS = " "
+Nobara = " "
+OpenBSD = "󰈺 "
+openSUSE = " "
+OracleLinux = "󰌷 "
+Pop = " "
+Raspbian = " "
+Redhat = " "
+RedHatEnterprise = " "
+RockyLinux = " "
+Redox = "󰀘 "
+Solus = "󰠳 "
+SUSE = " "
+Ubuntu = " "
+Unknown = " "
+Void = " "
+Windows = "󰍲 "
+
+[package]
+symbol = "󰏗 "
+
+[perl]
+symbol = " "
+
+[php]
+symbol = " "
+
+[pijul_channel]
+symbol = " "
+
+[pixi]
+symbol = "󰏗 "
+
+[python]
+symbol = " "
+
+[rlang]
+symbol = "󰟔 "
+
+[ruby]
+symbol = " "
+
+[rust]
+symbol = "󱘗 "
+
+[scala]
+symbol = " "
+
+[swift]
+symbol = " "
+
+[zig]
+symbol = " "
+
+[gradle]
+symbol = " "

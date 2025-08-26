@@ -2,7 +2,7 @@
 {
   programs.atuin = {
     enable = true;
-    enableZshIntegration = true;
+    enableFishIntegration = true;
     settings = {
       style = "auto";
       inline_height = 0;
