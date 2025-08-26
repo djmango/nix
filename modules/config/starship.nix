@@ -3,23 +3,18 @@
   programs.starship = {
     enable = true;
     settings = {
-      format = ''
-        $username\
-        $hostname\
-        $directory\
-        $git_branch\
-        $git_commit\
-        $git_state\
-        $git_metrics\
-        $git_status\
-        $package\
-        $nodejs\
-        $python\
-        $rust\
-        $jobs\
-        $status\
-        $character
-      '';
+      format = "$username"
+        + "$hostname"
+        + "$directory"
+        + "$git_branch"
+        + "$git_commit"
+        + "$git_state"
+        + "$git_metrics"
+        + "$git_status"
+        + "$package"
+        + "$jobs"
+        + "$status"
+        + "$character";
 
       add_newline = false;
 
@@ -53,7 +48,8 @@
       };
 
       git_status = {
-        format = "[$modified$ahead_behind]($style) ";
+        format = "[$modified]($style) ";
+        style = "bold purple";
         modified = "*";
       };
 

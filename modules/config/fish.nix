@@ -3,13 +3,14 @@
   programs.fish = {
     enable = true;
     interactiveShellInit = ''
-      # Initialize starship
-      ${pkgs.starship}/bin/starship init fish | source
-
       source '/nix/var/nix/profiles/default/etc/profile.d/nix.fish'
 
+      ${pkgs.starship}/bin/starship init fish | source
+      
+      set fish_greeting "Welcome home, $USER"
+
       fish_vi_key_bindings
-      bind -M insert \t accept-autosuggestion
+      bind -M insert \t accept-autosuggestion or complete
       
       alias npkg "nix search nixpkgs"
       alias gw "gh repo view -w"
