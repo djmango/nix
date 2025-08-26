@@ -8,6 +8,11 @@
       ${pkgs.starship}/bin/starship init fish | source
       
       set fish_greeting "Welcome home, $USER"
+      
+      # Source fish.local if it exists
+      if test -f ~/.config/fish/fish.local
+        source ~/.config/fish/fish.local
+      end
 
       fish_vi_key_bindings
       bind -M insert \t accept-autosuggestion or complete
