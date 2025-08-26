@@ -29,6 +29,8 @@
       fi
 
       export PATH="$HOME/.nix-profile/bin:$PATH"
+      
+      source ${pkgs.zsh-vi-mode}/share/zsh-vi-mode/zsh-vi-mode.plugin.zsh
 
       alias npkg="nix search nixpkgs"
       alias gw="gh repo view -w"
