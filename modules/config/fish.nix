@@ -11,13 +11,10 @@
       fish_vi_key_bindings
       bind -M insert \t accept-autosuggestion
       
-      # Aliases
       alias npkg "nix search nixpkgs"
       alias gw "gh repo view -w"
       alias x "explorer"
       alias k "kubectl"
-
-      set -x STARSHIP_CONFIG ${./starship.toml}
     '';
 
     plugins = [
@@ -25,9 +22,8 @@
     ];
   };
 
-  # Install required packages for fish and starship
+  # Install required packages for fish
   home.packages = with pkgs; [
-    starship
     nerd-fonts.meslo-lg
     fishPlugins.bass
   ];

@@ -3,6 +3,7 @@
   imports = [
     ./config/atuin.nix
     ./config/neovim.nix
+    ./config/starship.nix
     ./config/tmux.nix
     ./config/zoxide.nix
     ./config/fish.nix
@@ -18,27 +19,6 @@
   news.display = "silent";
 
   programs.direnv.enable = true;
-
-  # Set default shell to fish https://nixos.wiki/wiki/Fish
-  programs.bash = {
-    initExtra = ''
-      if [[ $(${pkgs.procps}/bin/ps --no-header --pid=$PPID --format=comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
-      then
-        shopt -q login_shell && LOGIN_OPTION='--login' || LOGIN_OPTION=""
-        exec ${pkgs.fish}/bin/fish $LOGIN_OPTION
-      fi
-    '';
-  };
-
-  programs.zsh = {
-    initExtra = ''
-      if [[ $(ps -o comm= -p $PPID) != "fish" ]]
-      then
-        if [[ -o login ]]; then LOGIN_OPTION="-l"; else LOGIN_OPTION=""; fi
-        exec ${pkgs.fish}/bin/fish $LOGIN_OPTION
-      fi
-    '';
-  };
 
   # Core programs
   home.packages = with pkgs; [
