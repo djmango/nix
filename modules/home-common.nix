@@ -42,8 +42,10 @@
     gh
     git
     git-lfs
+    go
     htop
     jq
+    lsof
     magic-wormhole
     nil
     nixd
@@ -52,6 +54,7 @@
     rsync
     ruff
     rustup
+    s5cmd
     tmux
     uv
     zed-editor
