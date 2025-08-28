@@ -23,6 +23,9 @@
 
       fish_vi_key_bindings
       bind -M insert \t accept-autosuggestion or complete
+      bind \cx\ce edit_command_buffer
+      bind -M insert \cx\ce edit_command_buffer
+      bind -M default \cx\ce edit_command_buffer
       
       alias npkg "nix search nixpkgs"
       alias gw "gh repo view -w"
