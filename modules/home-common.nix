@@ -36,6 +36,7 @@
     bun
     code2prompt
     dotslash
+    dust
     eza
     fd
     ffmpeg
