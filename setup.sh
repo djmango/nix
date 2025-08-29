@@ -160,7 +160,7 @@ if [ -x "$FISH_PATH" ]; then
 
     if [ "$IS_ROOT" = true ]; then
       if chsh -s "$FISH_PATH" || [ "$SHELL" = "$FISH_PATH" ]; then
-        echo "Default shell changed to fish. Log out and log back in, or run 'exec fish' to start using it immediately."
+        echo "Default shell changed to fish. Log out and log back in to start using it immediately."
       else
         echo "Error: Failed to change shell to fish."
       fi
