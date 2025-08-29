@@ -143,7 +143,21 @@ if [ -x "$FISH_PATH" ]; then
       fi
     fi
 
-    echo "Changing default shell to fish..."
+    # Only ask for confirmation if we actually need to switch shells
+    echo "Current shell: $SHELL"
+    echo "Fish shell available at: $FISH_PATH"
+    echo "Would you like to change your default shell to fish? (y/N)"
+    read -r response
+    case "$response" in
+      [yY][eE][sS]|[yY])
+        echo "Changing default shell to fish..."
+        ;;
+      *)
+        echo "Keeping current shell ($SHELL). You can manually change it later with 'chsh -s $FISH_PATH'"
+        return 0
+        ;;
+    esac
+
     if [ "$IS_ROOT" = true ]; then
       if chsh -s "$FISH_PATH" || [ "$SHELL" = "$FISH_PATH" ]; then
         echo "Default shell changed to fish. Log out and log back in, or run 'exec fish' to start using it immediately."
