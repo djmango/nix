@@ -32,7 +32,7 @@ echo "Detected system: $SYSTEM"
 # Handle broken/partial Nix installs: Uninstall if /nix exists but nix not found
 if [ -d /nix ] && ! command -v nix >/dev/null 2>&1; then
   echo "Detected partial Nix install; uninstalling first..."
-  /nix/nix-installer uninstall
+  /nix/nix-installer uninstall --no-confirm
 fi
 
 # Install Nix if missing or after uninstall
@@ -146,17 +146,25 @@ if [ -x "$FISH_PATH" ]; then
     # Only ask for confirmation if we actually need to switch shells
     echo "Current shell: $SHELL"
     echo "Fish shell available at: $FISH_PATH"
-    echo "Would you like to change your default shell to fish? (y/N)"
-    read -r response
-    case "$response" in
-      [yY][eE][sS]|[yY])
-        echo "Changing default shell to fish..."
-        ;;
-      *)
-        echo "Keeping current shell ($SHELL). You can manually change it later with 'chsh -s $FISH_PATH'"
-        return 0
-        ;;
-    esac
+
+    # Check if we're in an interactive terminal
+    if [ -t 0 ]; then
+      echo "Would you like to change your default shell to fish? (y/N)"
+      read -r response
+      case "$response" in
+        [yY][eE][sS]|[yY])
+          echo "Changing default shell to fish..."
+          ;;
+        *)
+          echo "Keeping current shell ($SHELL). You can manually change it later with 'chsh -s $FISH_PATH'"
+          exit 0
+          ;;
+      esac
+    else
+      echo "Non-interactive environment detected. Skipping shell change prompt."
+      echo "You can manually change your shell later with: chsh -s $FISH_PATH"
+      exit 0
+    fi
 
     if [ "$IS_ROOT" = true ]; then
       if chsh -s "$FISH_PATH" || [ "$SHELL" = "$FISH_PATH" ]; then
