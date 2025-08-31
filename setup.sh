@@ -32,7 +32,7 @@ echo "Detected system: $SYSTEM"
 # Handle broken/partial Nix installs: Uninstall if /nix exists but nix not found
 if [ -d /nix ] && ! command -v nix >/dev/null 2>&1; then
   echo "Detected partial Nix install; uninstalling first..."
-  /nix/nix-installer uninstall --no-confirm
+  /nix/nix-installer uninstall
 fi
 
 # Install Nix if missing or after uninstall
@@ -174,7 +174,7 @@ if [ -x "$FISH_PATH" ]; then
       fi
     else
       if sudo chsh -s "$FISH_PATH" || [ "$SHELL" = "$FISH_PATH" ]; then
-        echo "Default shell changed to fish. Log out and log back in, or run 'exec fish' to start using it immediately."
+        echo "Default shell changed to fish. Log out and log back in to start using it immediately."
       else
         echo "Error: Failed to change shell to fish. You may need to enter your password or check permissions."
       fi
