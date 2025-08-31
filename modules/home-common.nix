@@ -64,7 +64,6 @@
     tmux
     uv
     zed-editor
-    zerotierone
   ];
 
   # Allow unfree packages
