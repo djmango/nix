@@ -6,6 +6,8 @@
 
 set -e
 
+exec < /dev/tty # Force interactive stdin from terminal
+
 # Check if running as root
 IS_ROOT=false
 if [ "$(id -u)" -eq 0 ]; then
@@ -147,24 +149,17 @@ if [ -x "$FISH_PATH" ]; then
     echo "Current shell: $SHELL"
     echo "Fish shell available at: $FISH_PATH"
 
-    # Check if we're in an interactive terminal
-    if [ -t 0 ]; then
-      echo "Would you like to change your default shell to fish? (y/N)"
-      read -r response
-      case "$response" in
-        [yY][eE][sS]|[yY])
-          echo "Changing default shell to fish..."
-          ;;
-        *)
-          echo "Keeping current shell ($SHELL). You can manually change it later with 'chsh -s $FISH_PATH'"
-          exit 0
-          ;;
-      esac
-    else
-      echo "Non-interactive environment detected. Skipping shell change prompt."
-      echo "You can manually change your shell later with: chsh -s $FISH_PATH"
-      exit 0
-    fi
+    echo "Would you like to change your default shell to fish? (y/N)"
+    read -r response
+    case "$response" in
+      [yY][eE][sS]|[yY])
+        echo "Changing default shell to fish..."
+        ;;
+      *)
+        echo "Keeping current shell ($SHELL). You can manually change it later with 'chsh -s $FISH_PATH'"
+        exit 0
+        ;;
+    esac
 
     if [ "$IS_ROOT" = true ]; then
       if chsh -s "$FISH_PATH" || [ "$SHELL" = "$FISH_PATH" ]; then
