@@ -6,7 +6,22 @@
 
 set -e
 
-exec < /dev/tty # Force interactive stdin from terminal
+# Color definitions for prompts
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Function to read from terminal if interactive
+read_interactive() {
+  if [ -t 0 ]; then
+    # Running interactively, read normally
+    read -r "$@"
+  else
+    # Running from pipe, redirect stdin for this command only
+    read -r "$@" < /dev/tty
+  fi
+}
 
 # Check if running as root
 IS_ROOT=false
@@ -149,29 +164,29 @@ if [ -x "$FISH_PATH" ]; then
     echo "Current shell: $SHELL"
     echo "Fish shell available at: $FISH_PATH"
 
-    echo "Would you like to change your default shell to fish? (y/N)"
-    read -r response
+    printf "${GREEN}Would you like to change your default shell to fish?${NC} (${GREEN}y${NC}${RED}/N${NC}): "
+    read_interactive response
     case "$response" in
       [yY][eE][sS]|[yY])
-        echo "Changing default shell to fish..."
+        echo -e "${GREEN}✓ Changing default shell to fish...${NC}"
         ;;
       *)
-        echo "Keeping current shell ($SHELL). You can manually change it later with 'chsh -s $FISH_PATH'"
+        echo -e "${YELLOW}Keeping current shell ($SHELL).${NC} You can manually change it later with 'chsh -s $FISH_PATH'"
         exit 0
         ;;
     esac
 
     if [ "$IS_ROOT" = true ]; then
       if chsh -s "$FISH_PATH" || [ "$SHELL" = "$FISH_PATH" ]; then
-        echo "Default shell changed to fish. Log out and log back in to start using it immediately."
+        echo -e "${GREEN}✓ Default shell changed to fish. Log out and log back in to start using it immediately.${NC}"
       else
-        echo "Error: Failed to change shell to fish."
+        echo -e "${RED}✗ Error: Failed to change shell to fish.${NC}"
       fi
     else
       if sudo chsh -s "$FISH_PATH" || [ "$SHELL" = "$FISH_PATH" ]; then
-        echo "Default shell changed to fish. Log out and log back in to start using it immediately."
+        echo -e "${GREEN}✓ Default shell changed to fish. Log out and log back in to start using it immediately.${NC}"
       else
-        echo "Error: Failed to change shell to fish. You may need to enter your password or check permissions."
+        echo -e "${RED}✗ Error: Failed to change shell to fish. You may need to enter your password or check permissions.${NC}"
       fi
     fi
   fi
