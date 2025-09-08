@@ -168,25 +168,25 @@ if [ -x "$FISH_PATH" ]; then
     read_interactive response
     case "$response" in
       [yY][eE][sS]|[yY])
-        echo -e "${GREEN}✓ Changing default shell to fish...${NC}"
+        printf "${GREEN}✓ Changing default shell to fish...${NC}\n"
         ;;
       *)
-        echo -e "${YELLOW}Keeping current shell ($SHELL).${NC} You can manually change it later with 'chsh -s $FISH_PATH'"
+        printf "${YELLOW}Keeping current shell ($SHELL).${NC} You can manually change it later with 'chsh -s $FISH_PATH'\n"
         exit 0
         ;;
     esac
 
     if [ "$IS_ROOT" = true ]; then
       if chsh -s "$FISH_PATH" || [ "$SHELL" = "$FISH_PATH" ]; then
-        echo -e "${GREEN}✓ Default shell changed to fish. Log out and log back in to start using it immediately.${NC}"
+        printf "${GREEN}✓ Default shell changed to fish. Log out and log back in to start using it immediately.${NC}\n"
       else
-        echo -e "${RED}✗ Error: Failed to change shell to fish.${NC}"
+        printf "${RED}✗ Error: Failed to change shell to fish.${NC}\n"
       fi
     else
       if sudo chsh -s "$FISH_PATH" || [ "$SHELL" = "$FISH_PATH" ]; then
-        echo -e "${GREEN}✓ Default shell changed to fish. Log out and log back in to start using it immediately.${NC}"
+        printf "${GREEN}✓ Default shell changed to fish. Log out and log back in to start using it immediately.${NC}\n"
       else
-        echo -e "${RED}✗ Error: Failed to change shell to fish. You may need to enter your password or check permissions.${NC}"
+        printf "${RED}✗ Error: Failed to change shell to fish. You may need to enter your password or check permissions.${NC}\n"
       fi
     fi
   fi
