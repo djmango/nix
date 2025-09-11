@@ -20,6 +20,8 @@
           eval "$(/opt/homebrew/bin/brew shellenv)"
         end
       end
+      
+      set -gx PATH $HOME/.cargo/bin $PATH
 
       fish_vi_key_bindings
       bind -M insert \t accept-autosuggestion or complete
