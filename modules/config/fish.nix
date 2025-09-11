@@ -33,6 +33,7 @@
       alias gw "gh repo view -w"
       alias x "explorer"
       alias k "kubectl"
+      alias ls "eza"
     '';
 
     plugins = [
