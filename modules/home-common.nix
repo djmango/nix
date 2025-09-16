@@ -63,7 +63,6 @@
     s5cmd
     tmux
     uv
-    zed-editor
   ];
 
   # Allow unfree packages
