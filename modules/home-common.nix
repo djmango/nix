@@ -41,6 +41,7 @@
     bun
     code2prompt
     dotslash
+    duckdb
     dust
     eza
     fd
