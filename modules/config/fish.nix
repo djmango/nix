@@ -36,6 +36,7 @@
       alias x "explorer"
       alias k "kubectl"
       alias ls "eza"
+      alias p "pnpm"
     '';
 
     plugins = [
