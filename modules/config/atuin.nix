@@ -9,6 +9,9 @@
       enter_accept = true;
       keymap_mode = "auto";
       sync_address = "192.168.192.148";
+      history_filter = [
+        "^cd .* &&.*"
+      ];
     };
   };
 }
