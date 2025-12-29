@@ -10,6 +10,8 @@
     # Install required packages for the plugins
     extraPackages = with pkgs; [
       git # Required for lazy.nvim
+      ripgrep # Required for telescope live grep
+      fd # Fast file finder for telescope
     ];
 
     # Set up the configuration files
@@ -24,6 +26,10 @@
       -- Make H and L go to the start and end of the line
       vim.keymap.set("n", "H", "^", { noremap = true })
       vim.keymap.set("n", "L", "$", { noremap = true })
+
+      -- Window navigation with Ctrl+h/l
+      vim.keymap.set("n", "<C-h>", "<C-w>h", { noremap = true })
+      vim.keymap.set("n", "<C-l>", "<C-w>l", { noremap = true })
 
       -- Keep original j/k behavior available with gj/gk
       vim.keymap.set("n", "gj", "j", { noremap = true })
@@ -111,9 +117,58 @@
                   "nvim-tree/nvim-tree.lua",
                   dependencies = { "nvim-tree/nvim-web-devicons" },
                   config = function()
-                      require("nvim-tree").setup()
-                      vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { noremap = true, silent = true })
+                      require("nvim-tree").setup({
+                          update_focused_file = {
+                              enable = true,
+                              update_root = false,
+                          },
+                      })
+                      vim.keymap.set("n", "<leader>e", ":NvimTreeFindFileToggle<CR>", { noremap = true, silent = true })
+                      -- Auto-close nvim-tree if it's the last window
+                      vim.api.nvim_create_autocmd("QuitPre", {
+                          callback = function()
+                              local tree_wins = {}
+                              local floating_wins = {}
+                              local wins = vim.api.nvim_list_wins()
+                              for _, w in ipairs(wins) do
+                                  local bufname = vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(w))
+                                  if bufname:match("NvimTree_") ~= nil then
+                                      table.insert(tree_wins, w)
+                                  end
+                                  if vim.api.nvim_win_get_config(w).relative ~= "" then
+                                      table.insert(floating_wins, w)
+                                  end
+                              end
+                              if #wins - #floating_wins - #tree_wins == 1 then
+                                  for _, w in ipairs(tree_wins) do
+                                      vim.api.nvim_win_close(w, true)
+                                  end
+                              end
+                          end,
+                      })
                   end
+              },
+              {
+                  "nvim-telescope/telescope.nvim",
+                  branch = "0.1.x",
+                  dependencies = { "nvim-lua/plenary.nvim" },
+                  config = function()
+                      require("telescope").setup({
+                          defaults = {
+                              mappings = {
+                                  i = {
+                                      ["<C-j>"] = require("telescope.actions").move_selection_next,
+                                      ["<C-k>"] = require("telescope.actions").move_selection_previous,
+                                  },
+                              },
+                          },
+                      })
+                  end,
+                  keys = {
+                      { "<leader>f", function() require("telescope.builtin").find_files() end, desc = "Find Files" },
+                      { "<leader>g", function() require("telescope.builtin").live_grep() end, desc = "Live Grep" },
+                      { "<leader>b", function() require("telescope.builtin").buffers() end, desc = "Buffers" },
+                  },
               },
           },
           -- Configure any other settings here. See the documentation for more details.
