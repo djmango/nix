@@ -107,6 +107,14 @@
               },
               { "wellle/targets.vim", event = "VeryLazy" },
               { "tpope/vim-repeat", event = "VeryLazy" },
+              {
+                  "nvim-tree/nvim-tree.lua",
+                  dependencies = { "nvim-tree/nvim-web-devicons" },
+                  config = function()
+                      require("nvim-tree").setup()
+                      vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { noremap = true, silent = true })
+                  end
+              },
           },
           -- Configure any other settings here. See the documentation for more details.
           -- colorscheme that will be used when installing plugins.
