@@ -21,7 +21,7 @@
         end
       end
       
-      set -gx PATH $HOME/.local/bin $HOME/.cargo/bin $PATH
+      set -gx PATH $HOME/.npm-global/bin $HOME/.local/bin $HOME/.cargo/bin $PATH
 
       fish_vi_key_bindings
       bind -M insert \t accept-autosuggestion or complete
