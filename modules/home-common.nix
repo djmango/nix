@@ -7,6 +7,7 @@
     ./config/tmux.nix
     ./config/zoxide.nix
     ./config/fish.nix
+    ./config/package-managers.nix
   ];
 
   # Enable Home Manager to manage itself
