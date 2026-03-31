@@ -9,6 +9,8 @@ in
     {
       ".npmrc".text = ''
         ; Delay newly published npm packages by 7 days.
+        fund=false
+        audit=false
         min-release-age=${toString minReleaseAgeDays}
       '';
 
