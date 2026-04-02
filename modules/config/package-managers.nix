@@ -8,9 +8,9 @@ in
   home.file =
     {
       ".npmrc".text = ''
-        ; Delay newly published npm packages by 7 days.
         fund=false
         audit=false
+        ; Delay newly published npm packages by 7 days.
         min-release-age=${toString minReleaseAgeDays}
       '';
 

@@ -20,6 +20,9 @@
           eval "$(/opt/homebrew/bin/brew shellenv)"
         end
       end
+
+      # Prefer the Home Manager Node/npm toolchain over Homebrew.
+      fish_add_path -p ${pkgs.nodejs_25}/bin
       
       set -gx PATH $HOME/.npm-global/bin $HOME/.local/bin $HOME/.cargo/bin $PATH
 

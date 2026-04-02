@@ -26,6 +26,10 @@
     VISUAL = "nvim";
   };
 
+  home.sessionPath = [
+    "${pkgs.nodejs_25}/bin"
+  ];
+
   programs.bash = {
     initExtra = ''
       if [[ $(${pkgs.procps}/bin/ps --no-header --pid=$PPID --format=comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
@@ -55,6 +59,7 @@
     jq
     lsof
     magic-wormhole
+    nodejs_25
     nil
     nixd
     nixfmt
