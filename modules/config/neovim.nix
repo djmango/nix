@@ -15,7 +15,7 @@
     ];
 
     # Set up the configuration files
-    extraLuaConfig = ''
+    initLua = ''
       -- Use system clipboard
       vim.opt.clipboard:append("unnamedplus")
 
