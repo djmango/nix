@@ -170,6 +170,17 @@
                       { "<leader>b", function() require("telescope.builtin").buffers() end, desc = "Buffers" },
                   },
               },
+              {
+                  "f-person/git-blame.nvim",
+                  event = "VeryLazy",
+                  opts = {
+                      enabled = false,
+                      delay = 50,
+                  },
+                  keys = {
+                      { "<leader>tb", "<cmd>GitBlameToggle<CR>", desc = "Toggle Git Blame" },
+                  },
+              },
           },
           -- Configure any other settings here. See the documentation for more details.
           -- colorscheme that will be used when installing plugins.
