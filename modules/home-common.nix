@@ -13,6 +13,9 @@
   # Enable Home Manager to manage itself
   programs.home-manager.enable = true;
 
+  # Set login shell on non-NixOS systems (e.g. Debian) during home-manager switch
+  home.shell = "${pkgs.fish}/bin/fish";
+
   # Disable version mismatch warnings (we manage versions explicitly in flake.nix)
   home.enableNixpkgsReleaseCheck = false;
 
