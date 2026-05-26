@@ -146,12 +146,19 @@ fi
 
 # Change default shell to fish if not already
 FISH_PATH="$HOME/.nix-profile/bin/fish"
+TARGET_USER="${SUDO_USER:-$USER}"
+
+get_login_shell() {
+  getent passwd "$1" | cut -d: -f7
+}
+
 if [ -x "$FISH_PATH" ]; then
-  if [ "$SHELL" = "$FISH_PATH" ]; then
-    echo "Shell is already set to fish."
+  CURRENT_SHELL=$(get_login_shell "$TARGET_USER")
+  if [ "$CURRENT_SHELL" = "$FISH_PATH" ]; then
+    echo "Shell is already set to fish for $TARGET_USER."
   else
     # Check if fish is in /etc/shells, add it if not
-    if ! grep -q "^$FISH_PATH$" /etc/shells 2>/dev/null; then
+    if ! grep -qxF "$FISH_PATH" /etc/shells 2>/dev/null; then
       echo "Adding fish to /etc/shells..."
       if [ "$IS_ROOT" = true ]; then
         echo "$FISH_PATH" >> /etc/shells
@@ -161,33 +168,32 @@ if [ -x "$FISH_PATH" ]; then
     fi
 
     # Only ask for confirmation if we actually need to switch shells
-    echo "Current shell: $SHELL"
+    echo "Current login shell for $TARGET_USER: $CURRENT_SHELL"
     echo "Fish shell available at: $FISH_PATH"
 
-    printf "${GREEN}Would you like to change your default shell to fish?${NC} (${GREEN}y${NC}${RED}/N${NC}): "
+    printf "${GREEN}Would you like to change your default shell to fish?${NC} (${GREEN}y${NC}/${RED}N${NC}): "
     read_interactive response
     case "$response" in
       [yY][eE][sS]|[yY])
         printf "${GREEN}✓ Changing default shell to fish...${NC}\n"
         ;;
       *)
-        printf "${YELLOW}Keeping current shell ($SHELL).${NC} You can manually change it later with 'chsh -s $FISH_PATH'\n"
+        printf "${YELLOW}Keeping current shell ($CURRENT_SHELL).${NC} You can manually change it later with 'chsh -s $FISH_PATH $TARGET_USER'\n"
         exit 0
         ;;
     esac
 
     if [ "$IS_ROOT" = true ]; then
-      if chsh -s "$FISH_PATH" || [ "$SHELL" = "$FISH_PATH" ]; then
-        printf "${GREEN}✓ Default shell changed to fish. Log out and log back in to start using it immediately.${NC}\n"
-      else
-        printf "${RED}✗ Error: Failed to change shell to fish.${NC}\n"
-      fi
+      chsh -s "$FISH_PATH" "$TARGET_USER"
     else
-      if sudo chsh -s "$FISH_PATH" || [ "$SHELL" = "$FISH_PATH" ]; then
-        printf "${GREEN}✓ Default shell changed to fish. Log out and log back in to start using it immediately.${NC}\n"
-      else
-        printf "${RED}✗ Error: Failed to change shell to fish. You may need to enter your password or check permissions.${NC}\n"
-      fi
+      sudo chsh -s "$FISH_PATH" "$TARGET_USER"
+    fi
+
+    UPDATED_SHELL=$(get_login_shell "$TARGET_USER")
+    if [ "$UPDATED_SHELL" = "$FISH_PATH" ]; then
+      printf "${GREEN}✓ Default shell changed to fish for $TARGET_USER. Log out and log back in to start using it immediately.${NC}\n"
+    else
+      printf "${RED}✗ Error: Failed to change shell to fish for $TARGET_USER (still $UPDATED_SHELL).${NC}\n"
     fi
   fi
 else
