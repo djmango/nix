@@ -65,6 +65,7 @@
     nixfmt
     rclone
     rsync
+    ruby_3_3
     ruff
     rustup
     s5cmd
