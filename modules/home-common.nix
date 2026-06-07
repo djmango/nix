@@ -51,6 +51,7 @@
     bun
     ccls
     code2prompt
+    docker-compose
     dotslash
     duckdb
     dust
@@ -101,6 +102,7 @@
     watch
     wget
     xcbeautify
+    yt-dlp
     zola
   ];
 
