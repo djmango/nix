@@ -21,13 +21,15 @@
 
   programs.direnv.enable = true;
 
+  programs.fzf.enable = true;
+
   home.sessionVariables = {
     EDITOR = "nvim";
     VISUAL = "nvim";
   };
 
   home.sessionPath = [
-    "${pkgs.nodejs_25}/bin"
+    "${pkgs.nodejs_24}/bin"
   ];
 
   programs.bash = {
@@ -42,35 +44,64 @@
 
   # Core programs
   home.packages = with pkgs; [
+    age
+    arduino-cli
     bat
+    broot
     bun
+    ccls
     code2prompt
     dotslash
     duckdb
     dust
+    efm-langserver
     eza
+    exiftool
     fd
     ffmpeg
+    fswatch
+    fx
+    gawk
     gh
+    ghostscript
     git
     git-lfs
+    gnused
     go
+    graphviz
+    helix
     htop
+    iamb
+    imagemagick
     jq
     lsof
+    luarocks
     magic-wormhole
-    nodejs_25
+    mpv
+    nmap
+    nodejs_24
     nil
     nixd
     nixfmt
+    parallel
+    poppler-utils
     rclone
+    ripgrep
     rsync
     ruby_3_3
     ruff
     rustup
     s5cmd
+    sops
+    swiftformat
+    terminal-notifier
     tmux
+    tree
     uv
+    watch
+    wget
+    xcbeautify
+    zola
   ];
 
   # Allow unfree packages

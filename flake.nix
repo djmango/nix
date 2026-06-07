@@ -45,5 +45,19 @@
       name = "default@${system}";
       value = mkHome system;
     }) systems);
+
+    # Reusable per-project dev shells (e.g. for the robotics/C++ build deps that
+    # were removed from the global Homebrew/Nix profile). Use with:
+    #   nix flake init -t ~/nix#cpp   (scaffold a project flake)
+    #   nix develop ~/nix#cpp         (drop straight into the shell)
+    templates.cpp = {
+      path = ./templates/cpp;
+      description = "C++/robotics/CV dev shell (cmake, ninja, eigen, boost, Qt, ...)";
+    };
+
+    devShells = builtins.listToAttrs (map (system: {
+      name = system;
+      value.cpp = import ./templates/cpp/shell.nix nixpkgs.legacyPackages.${system};
+    }) systems);
   };
 }
