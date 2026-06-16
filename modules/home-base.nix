@@ -43,7 +43,9 @@
     age
     arduino-cli
     bat
+    bottom
     broot
+    btop
     bun
     ccls
     code2prompt
@@ -68,7 +70,6 @@
     go
     graphviz
     helix
-    htop
     iamb
     imagemagick
     jq
