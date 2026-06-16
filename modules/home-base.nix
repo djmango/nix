@@ -80,6 +80,7 @@
     nil
     nixd
     nixfmt
+    opentofu
     parallel
     poppler-utils
     rclone

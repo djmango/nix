@@ -2,9 +2,9 @@
 { pkgs, lib, ... }:
 
 {
-  home.packages = lib.mkAfter (with pkgs; [
+  home.packages = lib.mkIf pkgs.stdenv.isDarwin (lib.mkAfter (with pkgs; [
     swiftformat
     terminal-notifier
     xcbeautify
-  ]);
+  ]));
 }
