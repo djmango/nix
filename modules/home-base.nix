@@ -47,6 +47,7 @@
     bun
     ccls
     code2prompt
+    cloudflared
     docker-compose
     dotslash
     duckdb
