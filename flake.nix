@@ -20,7 +20,10 @@
     # Function to create a Home Manager config for a given system
     mkHome = system:
       home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+        };
         modules = [
           ./modules/home-common.nix
           ({ pkgs, config, ... }: {

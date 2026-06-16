@@ -6,6 +6,7 @@
     vimAlias = true;
     withNodeJs = true;
     withPython3 = true;
+    withRuby = false;
 
     # Install required packages for the plugins
     extraPackages = with pkgs; [

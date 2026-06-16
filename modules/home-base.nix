@@ -99,6 +99,4 @@
     yt-dlp
     zola
   ];
-
-  nixpkgs.config.allowUnfree = true;
 }
