@@ -2,6 +2,20 @@
 
 My minimal, portable Home Manager setup that works across macOS and Linux, for my personal dev environment.
 
+## Module layout
+
+```
+modules/
+  home-base.nix          # shared configs (nvim, fish, …) + cross-platform packages
+  home-darwin.nix        # macOS-only packages (terminal-notifier, xcbeautify, …)
+  home-linux-extras.nix  # Linux-only packages (optional)
+  home-common.nix        # base + auto-picks darwin or linux extras (Mac/desktop)
+  home-linux.nix         # base + linux extras (NixOS servers / homelab)
+```
+
+- **Mac:** `home-manager switch --flake ~/nix#default@…` uses `home-common.nix`
+- **nixbox (homelab):** imports `home-linux.nix` from this flake
+
 ## One-liner
 
 Run this command on any supported machine:

@@ -1,5 +1,5 @@
-# Home Manager profile for NixOS servers (nixbox, karakeep, …).
-{ pkgs, lib, ... }:
+# Shared Home Manager config: tool configs + cross-platform packages.
+{ pkgs, ... }:
 
 {
   imports = [
@@ -38,22 +38,29 @@
     '';
   };
 
+  # Safe on macOS and Linux — no platform-gated packages here.
   home.packages = with pkgs; [
     age
+    arduino-cli
     bat
     broot
     bun
+    ccls
     code2prompt
     docker-compose
+    dotslash
     duckdb
     dust
+    efm-langserver
     eza
+    exiftool
     fd
     ffmpeg
     fswatch
     fx
     gawk
     gh
+    ghostscript
     git
     git-lfs
     gnused
@@ -61,9 +68,11 @@
     graphviz
     helix
     htop
+    iamb
     imagemagick
     jq
     lsof
+    luarocks
     magic-wormhole
     mpv
     nmap
@@ -76,6 +85,7 @@
     rclone
     ripgrep
     rsync
+    ruby_3_3
     ruff
     rustup
     s5cmd
