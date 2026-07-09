@@ -1,10 +1,25 @@
 { pkgs, ... }:
+let
+  # Prefer Nix over Homebrew /usr/bin. fish_add_path is a no-op when a dir is
+  # already on PATH, so drop then prepend explicitly.
+  preferNixPath = ''
+    for _nixbin in ${pkgs.ruby_3_3}/bin ${pkgs.nodejs_24}/bin $HOME/.nix-profile/bin /nix/var/nix/profiles/default/bin
+      set -gx PATH $_nixbin (string match -v -- $_nixbin $PATH)
+    end
+    set -e _nixbin
+  '';
+in
 {
   programs.fish = {
     enable = true;
-    interactiveShellInit = ''
-      source '/nix/var/nix/profiles/default/etc/profile.d/nix.fish'
 
+    # Runs for interactive and non-interactive fish (scripts, Cursor terminals).
+    shellInit = ''
+      source '/nix/var/nix/profiles/default/etc/profile.d/nix.fish'
+      ${preferNixPath}
+    '';
+
+    interactiveShellInit = ''
       ${pkgs.starship}/bin/starship init fish | source
       
       set fish_greeting "Welcome home, $USER"
@@ -21,9 +36,6 @@
         end
       end
 
-      # Prefer the Home Manager Node/npm toolchain over Homebrew.
-      fish_add_path -p ${pkgs.nodejs_24}/bin
-      
       set -gx PATH $HOME/.npm-global/bin $HOME/.local/bin $HOME/.cargo/bin $PATH
 
       # Ruby: use the Home Manager toolchain and neutralize leaked rvm/system gem
@@ -33,13 +45,8 @@
       set -gx GEM_HOME $HOME/.gem
       fish_add_path -p ${pkgs.ruby_3_3}/bin $HOME/.gem/bin
 
-      # Force Nix-managed tools ahead of Homebrew and the macOS /usr/bin defaults.
-      # fish_add_path is a no-op when a dir is already on PATH, so prepend explicitly
-      # (dropping any existing occurrence first to avoid duplicates).
-      for _nixbin in ${pkgs.ruby_3_3}/bin ${pkgs.nodejs_24}/bin $HOME/.nix-profile/bin /nix/var/nix/profiles/default/bin
-        set -gx PATH $_nixbin (string match -v -- $_nixbin $PATH)
-      end
-      set -e _nixbin
+      # brew shellenv prepends Homebrew; put Nix back in front.
+      ${preferNixPath}
 
       fish_vi_key_bindings
       bind -M insert \t accept-autosuggestion or complete

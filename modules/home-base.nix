@@ -1,5 +1,5 @@
 # Shared Home Manager config: tool configs + cross-platform packages.
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 
 {
   imports = [
@@ -24,7 +24,10 @@
     VISUAL = "nvim";
   };
 
+  # Prepend for all shells that source HM session vars (not only interactive fish).
   home.sessionPath = [
+    "${config.home.homeDirectory}/.nix-profile/bin"
+    "/nix/var/nix/profiles/default/bin"
     "${pkgs.nodejs_24}/bin"
   ];
 
