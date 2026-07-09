@@ -121,6 +121,39 @@ if ! command -v nix >/dev/null 2>&1; then
   exit 1
 fi
 
+# Flakes/home-manager need nix-command + flakes (disabled on stock Nix installs).
+enable_nix_flakes() {
+  export NIX_CONFIG="${NIX_CONFIG:+${NIX_CONFIG} }experimental-features = nix-command flakes"
+
+  local line="experimental-features = nix-command flakes"
+  local sys_conf="/etc/nix/nix.conf"
+
+  if [ -f "$sys_conf" ] && grep -q 'nix-command' "$sys_conf" 2>/dev/null; then
+    return
+  fi
+
+  echo "Enabling Nix flakes (nix-command, flakes)..."
+  if [ "$IS_ROOT" = true ]; then
+    mkdir -p /etc/nix
+    if [ -f "$sys_conf" ]; then
+      printf '\n%s\n' "$line" >> "$sys_conf"
+    else
+      printf '%s\n' "$line" > "$sys_conf"
+    fi
+  else
+    sudo mkdir -p /etc/nix
+    if sudo test -f "$sys_conf" && sudo grep -q 'nix-command' "$sys_conf" 2>/dev/null; then
+      return
+    fi
+    if sudo test -f "$sys_conf"; then
+      printf '\n%s\n' "$line" | sudo tee -a "$sys_conf" > /dev/null
+    else
+      printf '%s\n' "$line" | sudo tee "$sys_conf" > /dev/null
+    fi
+  fi
+}
+enable_nix_flakes
+
 # Clone/pull repo
 REPO_URL="https://github.com/djmango/nix.git"
 REPO_DIR=~/nix
