@@ -186,8 +186,58 @@
           -- Configure any other settings here. See the documentation for more details.
           -- colorscheme that will be used when installing plugins.
           -- install = { colorscheme = { "habamax" } },
-          -- automatically check for plugin updates
-          checker = { enabled = true },
+          -- Check for updates quietly; we auto-update in the background below
+          checker = { enabled = true, notify = false },
+      })
+
+      -- Auto-update plugins in the background, but only once an available
+      -- update has been sitting there (pending) for at least 7 days.
+      local lazy_pending_marker = vim.fn.stdpath("state") .. "/lazy-updates-pending"
+
+      local function lazy_read_pending()
+          local f = io.open(lazy_pending_marker, "r")
+          if not f then return nil end
+          local v = tonumber(f:read("*a"))
+          f:close()
+          return v
+      end
+
+      local function lazy_write_pending(v)
+          local f = io.open(lazy_pending_marker, "w")
+          if f then
+              f:write(tostring(v))
+              f:close()
+          end
+      end
+
+      -- Kick off a background check (git fetch) shortly after startup.
+      vim.api.nvim_create_autocmd("User", {
+          pattern = "VeryLazy",
+          callback = function()
+              require("lazy").check({ show = false })
+          end,
+      })
+
+      -- Once the check finishes, decide whether the pending updates are old
+      -- enough (>= 7 days) to install automatically.
+      vim.api.nvim_create_autocmd("User", {
+          pattern = "LazyCheck",
+          callback = function()
+              local has_updates = require("lazy.status").updates() ~= nil
+              local now = os.time()
+              if not has_updates then
+                  os.remove(lazy_pending_marker)
+                  return
+              end
+              local first_seen = lazy_read_pending()
+              if not first_seen then
+                  -- First time we've noticed these updates; start the clock.
+                  lazy_write_pending(now)
+              elseif now - first_seen >= 7 * 86400 then
+                  require("lazy").update({ show = false })
+                  os.remove(lazy_pending_marker)
+              end
+          end,
       })
 
       vim.cmd[[colorscheme tokyonight]]
