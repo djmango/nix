@@ -50,7 +50,12 @@ in
 
       fish_vi_key_bindings
       bind -M insert \t accept-autosuggestion or complete
-      bind -M insert \el accept-autosuggestion
+      # Option+h / Option+H: kill back one word (vim b) / WORD (vim B)
+      bind -M insert \eh backward-kill-word
+      bind -M insert \eH backward-kill-bigword
+      # Option+l / Option+L: accept one autosuggestion word (vim w) / whole suggestion
+      bind -M insert \el forward-word
+      bind -M insert \eL accept-autosuggestion
       bind -M insert \e\; complete
       bind \cx\ce edit_command_buffer
       bind -M insert \cx\ce edit_command_buffer

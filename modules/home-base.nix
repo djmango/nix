@@ -17,7 +17,11 @@
   news.display = "silent";
 
   programs.direnv.enable = true;
-  programs.fzf.enable = true;
+  programs.fzf = {
+    enable = true;
+    # Atuin owns Ctrl-R; keep fzf for Ctrl-T / Alt-C etc.
+    historyWidget.fish.command = "";
+  };
 
   home.sessionVariables = {
     EDITOR = "nvim";
