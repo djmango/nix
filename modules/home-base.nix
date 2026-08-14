@@ -33,6 +33,7 @@
     "${config.home.homeDirectory}/.nix-profile/bin"
     "/nix/var/nix/profiles/default/bin"
     "${pkgs.nodejs_24}/bin"
+    "${config.home.homeDirectory}/.bun/bin"
   ];
 
   programs.bash = {

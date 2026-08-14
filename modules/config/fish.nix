@@ -8,6 +8,10 @@ let
     end
     set -e _nixbin
   '';
+  # Append so Nix bun stays ahead of the leftover ~/.bun/bin/bun binary.
+  bunGlobalBin = ''
+    fish_add_path -aP $HOME/.bun/bin
+  '';
 in
 {
   programs.fish = {
@@ -17,6 +21,7 @@ in
     shellInit = ''
       source '/nix/var/nix/profiles/default/etc/profile.d/nix.fish'
       ${preferNixPath}
+      ${bunGlobalBin}
     '';
 
     interactiveShellInit = ''
@@ -36,7 +41,7 @@ in
         end
       end
 
-      set -gx PATH $HOME/.npm-global/bin $HOME/.local/bin $HOME/.cargo/bin $PATH
+      set -gx PATH $HOME/.npm-global/bin $HOME/.local/bin $HOME/.cargo/bin $HOME/.bun/bin $PATH
 
       # Ruby: use the Home Manager toolchain and neutralize leaked rvm/system gem
       # env (rvm sourced from ~/.bash_profile pollutes GEM_HOME while /usr/bin's
@@ -47,6 +52,7 @@ in
 
       # brew shellenv prepends Homebrew; put Nix back in front.
       ${preferNixPath}
+      ${bunGlobalBin}
 
       fish_vi_key_bindings
       bind -M insert \t accept-autosuggestion or complete

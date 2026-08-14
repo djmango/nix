@@ -8,7 +8,7 @@
       inline_height = 0;
       enter_accept = true;
       keymap_mode = "auto";
-      sync_address = "192.168.192.148";
+      auto_sync = false;
       history_filter = [
         "^cd .* &&.*"
       ];

@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+"""Cursor -> SidePulse status bridge (status ONLY, no message content).
+
+Emits a status transition to the SidePulse status-bar over its local unix
+socket. Deliberately writes nothing to disk: no logs, no chat content, no
+session transcripts. The only thing that persists is whatever the status-bar
+itself keeps in latest.json (aggregate mode + timestamps).
+
+Usage: sidepulse-cursor-status <working|done|ask|blocked|idle>
+
+Wired from ~/.cursor/hooks.json:
+  beforeSubmitPrompt -> working
+  stop               -> done
+"""
+
+import json
+import os
+import socket
+import sys
+from datetime import datetime, timezone
+
+SOCKET = os.path.expanduser("~/.local/state/sidepulse/agent-monitor/events.sock")
+VALID = {"working", "done", "ask", "blocked", "idle"}
+
+
+def main() -> int:
+    status = sys.argv[1] if len(sys.argv) > 1 else "idle"
+    if status not in VALID:
+        return 0
+
+    line = {
+        "logged_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "hook_event_name": "Notification",
+        "session_id": "cursor",
+        "cwd": os.getcwd(),
+        "sidepulse_status": status,
+    }
+    payload = json.dumps(
+        {"provider": "cursor", "line": line}, separators=(",", ":"), ensure_ascii=False
+    ).encode("utf-8")
+
+    try:
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.settimeout(0.2)
+        sock.connect(SOCKET)
+        sock.sendall(payload)
+    except OSError:
+        # Status bar not running / socket not up - fail silently, never crash Cursor.
+        pass
+    finally:
+        try:
+            sock.close()
+        except (OSError, NameError):
+            pass
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

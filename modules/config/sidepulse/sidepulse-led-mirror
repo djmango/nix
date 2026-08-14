@@ -1,0 +1,213 @@
+#!/usr/bin/env python3
+"""SidePulse socket -> LED mirror (non-GUI, deterministic, sleep-aware).
+
+Drives the SidePulse LEDs from agent status events published over the status
+bar unix socket (used by the Cursor and omp bridges). Status-only: it never
+reads, logs, or stores chat content.
+
+Behavior:
+  - Each bridge event carries an explicit `sidepulse_status` token
+    (working / done / ask / blocked / idle) mapped directly to the LED
+    animation: working cyan slinky, done solid green, ask amber pulse,
+    blocked red, idle dim. No priority-merge, so a lingering "done" can never
+    mask a new ask/idle.
+  - IDLE_AFTER_SECONDS with no events -> idle, so it never stays lit forever.
+  - On macOS sleep -> LEDs turn fully OFF; on wake -> reflects current status.
+  - Keeps the device awake and re-syncs if a write failed or the device
+    re-mounted.
+"""
+
+import subprocess
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+
+CONFIG = Path.home() / ".local" / "state" / "sidepulse" / "agent-monitor"
+KEEPALIVE = "/Volumes/SidePulse/keepalive"
+DEVICE_LED_FILE = "/Volumes/SidePulse/LEDS.LED"
+IDLE_AFTER_SECONDS = 5 * 60  # no events for this long -> show Idle
+
+from sidepulse.led_status import (
+    DEFAULT_FILE_NAME,
+    resolve_target_path,
+    write_led_program,
+    write_mode_to_leds,
+)
+from sidepulse.models import AgentMode
+
+# Explicit bridge status token -> sidepulse animation mode.
+TOKEN_TO_MODE = {
+    "working": AgentMode.WORKING,
+    "done": AgentMode.COMPLETED,
+    "ask": AgentMode.WAITING_FOR_INPUT,
+    "blocked": AgentMode.BLOCKED_ERROR,
+    "idle": AgentMode.IDLE_READY,
+}
+
+
+def log(msg: str) -> None:
+    print(f"{datetime.now(timezone.utc).isoformat()} {msg}", flush=True)
+
+
+def device_present() -> bool:
+    return Path(DEVICE_LED_FILE).exists()
+
+
+def main() -> int:
+    current_mode: AgentMode = AgentMode.IDLE_READY
+    written_ok = True
+    last_event_at = time.monotonic()
+    last_device_seen = device_present()
+
+    def write_current(mode: AgentMode) -> None:
+        nonlocal written_ok
+        try:
+            write_mode_to_leds(mode)
+            log(f"leds={mode.value}")
+            written_ok = True
+        except Exception as exc:
+            written_ok = False
+            log(f"led write error ({mode.value}): {exc}")
+
+    def write_off() -> None:
+        try:
+            target = resolve_target_path(device_path=None, file_name=DEFAULT_FILE_NAME)
+            write_led_program("off", device_path=target)
+            log("leds=off (sleep)")
+        except Exception as exc:
+            log(f"sleep off write error: {exc}")
+
+    def apply(token: str) -> None:
+        nonlocal current_mode, written_ok
+        mode = TOKEN_TO_MODE.get(token)
+        if mode is None or mode == current_mode:
+            return
+        current_mode = mode
+        write_current(mode)
+
+    # --- Unix socket server (background thread) ---------------------------
+    import json
+    import socket
+    import threading
+
+    sock_path = CONFIG / "events.sock"
+
+    def on_event(provider: str, line: dict) -> None:
+        nonlocal last_event_at
+        token = line.get("sidepulse_status") if isinstance(line, dict) else None
+        if isinstance(token, str):
+            last_event_at = time.monotonic()
+            apply(token)
+
+    def server_thread() -> None:
+        try:
+            sock_path.unlink()
+        except FileNotFoundError:
+            pass
+        server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        server.bind(str(sock_path))
+        server.listen(16)
+        server.settimeout(1.0)
+        log(f"listening={sock_path}")
+        try:
+            while True:
+                try:
+                    conn, _ = server.accept()
+                except socket.timeout:
+                    continue
+                except OSError:
+                    return
+                with conn:
+                    chunks: list[bytes] = []
+                    while True:
+                        try:
+                            chunk = conn.recv(65536)
+                        except OSError:
+                            break
+                        if not chunk:
+                            break
+                        chunks.append(chunk)
+                    try:
+                        msg = json.loads(b"".join(chunks).decode("utf-8"))
+                        if isinstance(msg, dict):
+                            on_event(str(msg.get("provider", "")), msg.get("line") or {})
+                    except Exception as exc:
+                        log(f"event parse error: {exc}")
+        except Exception as exc:
+            log(f"server error: {exc}")
+        finally:
+            server.close()
+
+    threading.Thread(target=server_thread, daemon=True).start()
+
+    # --- Sleep / wake notifications (NSWorkspace, runloop-pumped) ---------
+    try:
+        import Foundation
+        from AppKit import NSWorkspace
+
+        nc = NSWorkspace.sharedWorkspace().notificationCenter()
+        nc.addObserverForName_object_queue_usingBlock_(
+            "NSWorkspaceWillSleepNotification", None, None,
+            lambda _note: write_off(),
+        )
+        nc.addObserverForName_object_queue_usingBlock_(
+            "NSWorkspaceDidWakeNotification", None, None,
+            lambda _note: write_current(current_mode),
+        )
+        runloop = Foundation.NSRunLoop.currentRunLoop()
+        have_runloop = True
+        log("power notifications registered")
+    except Exception as exc:
+        runloop = None
+        have_runloop = False
+        log(f"power monitoring unavailable: {exc}")
+
+    # Initial state.
+    write_current(current_mode)
+
+    last_keepalive = 0.0
+    try:
+        while True:
+            if have_runloop:
+                runloop.runMode_beforeDate_(
+                    Foundation.NSDefaultRunLoopMode,
+                    Foundation.NSDate.dateWithTimeIntervalSinceNow_(0.25),
+                )
+            else:
+                time.sleep(0.25)
+
+            now = time.monotonic()
+            present = device_present()
+
+            # Fall back to Idle after inactivity.
+            if current_mode != AgentMode.IDLE_READY and now - last_event_at > IDLE_AFTER_SECONDS:
+                current_mode = AgentMode.IDLE_READY
+                write_current(current_mode)
+
+            # Recover from a transient write failure or device re-mount.
+            if present and not written_ok:
+                write_current(current_mode)
+            if present and not last_device_seen:
+                log("device re-mounted; resyncing LEDs")
+                write_current(current_mode)
+            last_device_seen = present
+
+            if present and now - last_keepalive >= 60:
+                try:
+                    subprocess.run(
+                        ["/usr/bin/touch", KEEPALIVE],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        timeout=2,
+                        check=False,
+                    )
+                    last_keepalive = now
+                except Exception:
+                    pass
+    except KeyboardInterrupt:
+        pass
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
