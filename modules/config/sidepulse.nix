@@ -27,10 +27,13 @@ in
     home.file.".local/bin/sidepulse-led-mirror" = {
       source = ./sidepulse/sidepulse-led-mirror;
       executable = true;
+      # The repo copy is the source of truth; replace legacy plain files.
+      force = true;
     };
     home.file.".local/bin/sidepulse-cursor-status" = {
       source = ./sidepulse/sidepulse-cursor-status;
       executable = true;
+      force = true;
     };
 
     launchd.agents.sidepulse-ledmirror = {
