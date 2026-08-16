@@ -89,6 +89,7 @@ def main() -> int:
     current_mode: AgentMode = AgentMode.IDLE_READY
     current_brightness_ratio = 1.0
     last_ratio: float | None = None
+    last_brightness_at = 0.0
     written_ok = True
     last_event_at = time.monotonic()
     last_device_seen = device_present()
@@ -215,7 +216,11 @@ def main() -> int:
             present = device_present()
 
             # Follow system brightness (only scales LEDs; animation unchanged).
-            ratio = system_brightness_ratio() if present else (last_ratio or 1.0)
+            # Re-read the backlight at most every 5s to keep it cheap.
+            ratio = last_ratio if last_ratio is not None else 1.0
+            if present and now - last_brightness_at >= 5.0:
+                ratio = system_brightness_ratio()
+                last_brightness_at = now
             brightness_changed = (
                 last_ratio is None
                 or abs(ratio - last_ratio) >= 0.03
