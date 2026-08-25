@@ -10,6 +10,7 @@
     ./config/zoxide.nix
     ./config/fish.nix
     ./config/package-managers.nix
+    ./config/omp.nix
   ];
 
   programs.home-manager.enable = true;
