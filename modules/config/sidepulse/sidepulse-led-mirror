@@ -54,13 +54,55 @@ def device_present() -> bool:
     return Path(DEVICE_LED_FILE).exists()
 
 
+def _display_services_ratio() -> float | None:
+    """Control Center / keyboard brightness, 0.0-1.0. None if unavailable."""
+    try:
+        import ctypes
+        from ctypes import POINTER, c_float, c_int, c_uint32
+
+        cg = ctypes.CDLL("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+        ds = ctypes.CDLL(
+            "/System/Library/PrivateFrameworks/DisplayServices.framework/DisplayServices"
+        )
+        cg.CGMainDisplayID.restype = c_uint32
+        ds.DisplayServicesGetBrightness.argtypes = [c_uint32, POINTER(c_float)]
+        ds.DisplayServicesGetBrightness.restype = c_int
+        val = c_float()
+        rc = ds.DisplayServicesGetBrightness(cg.CGMainDisplayID(), ctypes.byref(val))
+        if rc == 0 and 0.0 <= val.value <= 1.0:
+            return float(val.value)
+    except Exception:
+        return None
+    return None
+
+
+def _ioreg_nits_ratio(out: str) -> float | None:
+    m = re.search(r'"BrightnessMilliNits"\s*=\s*\{([^}]*)\}', out)
+    if not m:
+        return None
+    body = m.group(1)
+    vm = re.search(r'"value"=(\d+)', body)
+    xm = re.search(r'"max"=(\d+)', body)
+    if not vm or not xm:
+        return None
+    maximum = int(xm.group(1))
+    if maximum <= 0:
+        return None
+    return max(0.0, min(1.0, int(vm.group(1)) / maximum))
+
+
 def system_brightness_ratio() -> float:
     """Current display brightness as a 0.0-1.0 ratio (falls back to 1.0).
 
-    Reads the ARM backlight brightness (`value`/`max`) via ioreg. Returned so
-    the LED brightness matches the system brightness percentage; only the
-    brightness is scaled, never the animation/colors.
+    DisplayServices tracks the Control Center slider. The AppleARMBacklight
+    `brightness` 16-bit key sits at 50% on this hardware and is the wrong
+    source — that is why the LEDs stayed at `brightness 128` (looks full-on)
+    while the Mac was dimmed. BrightnessMilliNits is the ioreg fallback.
+    Only LED brightness is scaled; animation and colors are unchanged.
     """
+    ratio = _display_services_ratio()
+    if ratio is not None:
+        return ratio
     try:
         out = subprocess.run(
             ["/usr/sbin/ioreg", "-rc", "AppleARMBacklight"],
@@ -69,25 +111,17 @@ def system_brightness_ratio() -> float:
             timeout=2,
             check=False,
         ).stdout
-        m = re.search(r'"brightness"\s*=\s*\{([^}]*)\}', out)
-        if not m:
-            return 1.0
-        body = m.group(1)
-        vm = re.search(r'"value"=(\d+)', body)
-        xm = re.search(r'"max"=(\d+)', body)
-        if not vm or not xm:
-            return 1.0
-        value, maximum = int(vm.group(1)), int(xm.group(1))
-        if maximum <= 0:
-            return 1.0
-        return max(0.0, min(1.0, value / maximum))
+        nits = _ioreg_nits_ratio(out)
+        if nits is not None:
+            return nits
     except Exception:
-        return 1.0
+        pass
+    return 1.0
 
 
 def main() -> int:
     current_mode: AgentMode = AgentMode.IDLE_READY
-    current_brightness_ratio = 1.0
+    current_brightness_ratio = system_brightness_ratio()
     last_ratio: float | None = None
     last_brightness_at = 0.0
     written_ok = True
@@ -99,7 +133,7 @@ def main() -> int:
         led_brightness = max(0, min(255, int(round(current_brightness_ratio * 255))))
         try:
             write_mode_to_leds(mode, brightness=led_brightness)
-            log(f"leds={mode.value} bright={led_brightness}")
+            log(f"leds={mode.value} bright={led_brightness} ({round(current_brightness_ratio * 100)}%)")
             written_ok = True
         except Exception as exc:
             written_ok = False
@@ -216,9 +250,9 @@ def main() -> int:
             present = device_present()
 
             # Follow system brightness (only scales LEDs; animation unchanged).
-            # Re-read the backlight at most every 5s to keep it cheap.
-            ratio = last_ratio if last_ratio is not None else 1.0
-            if present and now - last_brightness_at >= 5.0:
+            # Re-read at most once a second so slider changes show up quickly.
+            ratio = last_ratio if last_ratio is not None else current_brightness_ratio
+            if present and now - last_brightness_at >= 1.0:
                 ratio = system_brightness_ratio()
                 last_brightness_at = now
             brightness_changed = (
