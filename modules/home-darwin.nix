@@ -4,6 +4,7 @@
 {
   imports = [
     ./config/sidepulse.nix
+    ./config/ollama.nix
   ];
 
   home.packages = lib.mkIf pkgs.stdenv.isDarwin (lib.mkAfter (with pkgs; [
