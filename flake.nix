@@ -76,11 +76,18 @@
         ];
       };
   in {
-    # Output configs for each system
-    homeConfigurations = builtins.listToAttrs (map (system: {
-      name = "default@${system}";
-      value = mkHome system;
-    }) systems);
+    # Output configs for each system.
+    # Darwin's `uname -m` is `arm64`; Nix's canonical system is `aarch64-darwin`.
+    # Alias the uname spelling so `~/nix#default@$(uname -m)-darwin` works.
+    homeConfigurations =
+      let
+        homes = builtins.listToAttrs (map (system: {
+          name = "default@${system}";
+          value = mkHome system;
+        }) systems);
+      in homes // {
+        "default@arm64-darwin" = homes."default@aarch64-darwin";
+      };
 
     # Reusable per-project dev shells (e.g. for the robotics/C++ build deps that
     # were removed from the global Homebrew/Nix profile). Use with:

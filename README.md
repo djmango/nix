@@ -37,7 +37,9 @@ That's it! The script will:
 
 ### Manual Commands
 ```bash
-# Switch to your config (after setup)
+# Switch to your config (after setup).
+# Apple Silicon: `uname -m` is `arm64`; Nix's system is `aarch64-darwin`.
+# The flake aliases `default@arm64-darwin` to `default@aarch64-darwin`.
 home-manager switch --impure --flake ~/nix#default@$(uname -m)-$(uname -s | tr '[:upper:]' '[:lower:]')
 
 # Update flake dependencies
