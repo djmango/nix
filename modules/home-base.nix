@@ -11,6 +11,7 @@
     ./config/fish.nix
     ./config/package-managers.nix
     ./config/omp.nix
+    ./config/tailscale.nix
   ];
 
   programs.home-manager.enable = true;
