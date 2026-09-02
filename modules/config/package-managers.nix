@@ -1,11 +1,11 @@
 { lib, pkgs, config, ... }:
 let
-  minReleaseAgeDays = 7;
+  minReleaseAgeDays = 3;
   pnpmMinReleaseAgeMinutes = minReleaseAgeDays * 24 * 60;
   bunMinReleaseAgeSeconds = minReleaseAgeDays * 24 * 60 * 60;
 in
 {
-  # nixpkgs uv may be older than relative exclude-newer ("7 days", "P7D"); RFC 3339 always works.
+  # nixpkgs uv may be older than relative exclude-newer ("N days", "PND"); RFC 3339 always works.
   home.activation.uvExcludeNewer = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
     _dst="${config.home.homeDirectory}/.config/uv/uv.toml"
     ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname "$_dst")"
@@ -21,29 +21,29 @@ in
       ".npmrc".text = ''
         fund=false
         audit=false
-        ; Delay newly published npm packages by 7 days.
+        ; Delay newly published npm packages by ${toString minReleaseAgeDays} days.
         min-release-age=${toString minReleaseAgeDays}
       '';
 
       ".yarnrc.yml".text = ''
-        # Delay newly published npm packages by 7 days.
-        npmMinimalAgeGate: "7d"
+        # Delay newly published npm packages by ${toString minReleaseAgeDays} days.
+        npmMinimalAgeGate: "${toString minReleaseAgeDays}d"
       '';
 
       ".bunfig.toml".text = ''
         [install]
-        # Delay newly published npm packages by 7 days.
+        # Delay newly published npm packages by ${toString minReleaseAgeDays} days.
         minimumReleaseAge = ${toString bunMinReleaseAgeSeconds}
       '';
 
       ".config/pnpm/config.yaml".text = ''
-        # Delay newly published npm packages by 7 days.
+        # Delay newly published npm packages by ${toString minReleaseAgeDays} days.
         minimumReleaseAge: ${toString pnpmMinReleaseAgeMinutes}
       '';
     }
     // lib.optionalAttrs pkgs.stdenv.isDarwin {
       "Library/Preferences/pnpm/config.yaml".text = ''
-        # Delay newly published npm packages by 7 days.
+        # Delay newly published npm packages by ${toString minReleaseAgeDays} days.
         minimumReleaseAge: ${toString pnpmMinReleaseAgeMinutes}
       '';
     };
