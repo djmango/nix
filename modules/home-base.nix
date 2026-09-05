@@ -10,7 +10,6 @@
     ./config/zoxide.nix
     ./config/fish.nix
     ./config/package-managers.nix
-    ./config/omp.nix
     ./config/tailscale.nix
   ];
 
