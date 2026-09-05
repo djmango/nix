@@ -1,6 +1,6 @@
 # Optional macOS-only module: SidePulse LED status mirror.
 #
-# Drives a SidePulse Pro / Dot from agent status events (Cursor, omp) via a
+# Drives a SidePulse Pro / Dot from agent status events (Cursor, omp, Hermes) via a
 # small headless daemon + launchd agent. The `sidepulse` CLI itself is kept on
 # `uv tool` (packaging pyobjc in nix is heavy); this module declaratively
 # manages the daemon/bridge scripts and the LaunchAgent instead.
@@ -32,6 +32,11 @@ in
     };
     home.file.".local/bin/sidepulse-cursor-status" = {
       source = ./sidepulse/sidepulse-cursor-status;
+      executable = true;
+      force = true;
+    };
+    home.file.".local/bin/sidepulse-hermes-status" = {
+      source = ./sidepulse/sidepulse-hermes-status;
       executable = true;
       force = true;
     };
