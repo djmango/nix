@@ -78,6 +78,7 @@
     gnused
     go
     graphviz
+    gws
     helix
     iamb
     imagemagick
