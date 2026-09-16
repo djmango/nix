@@ -48,6 +48,8 @@ MIN_MODE_HOLD_SECONDS = 1.5
 PRESENCE_POLL_SECONDS = 1.0
 # Retry cadence after a failed LED write.
 WRITE_RETRY_SECONDS = 5.0
+# Grace period after the device re-mounts before writing to it again.
+DEVICE_SETTLE_SECONDS = 2.0
 # Used only if brightness is unreadable from the very first second on.
 FALLBACK_BRIGHTNESS_RATIO = 0.5
 
@@ -425,6 +427,9 @@ def main() -> int:
                 write_current(current_mode)
             if present and not last_device_seen:
                 log("device re-mounted; resyncing LEDs")
+                # Let the firmware finish its power-up sequence before writing:
+                # a write landing mid-boot is what makes the strip blink red.
+                time.sleep(DEVICE_SETTLE_SECONDS)
                 write_dark_init()
                 write_current(current_mode, force=True)
             last_device_seen = present
