@@ -52,12 +52,22 @@ WRITE_RETRY_SECONDS = 5.0
 DEVICE_SETTLE_SECONDS = 2.0
 # Used only if brightness is unreadable from the very first second on.
 FALLBACK_BRIGHTNESS_RATIO = 0.5
+# Ambient-light jitter must not rewrite the program: every write restarts the
+# animation from line 1, which reads as a stutter/flash. Only rewrite when the
+# brightness moves by a whole bucket.
+BRIGHTNESS_BUCKET = 0.05
+
+# Idle is a static "off", not a looping animation: an idle strip must show
+# nothing at all (the old `#020204 6s pulse` kept the controller animating).
+IDLE_PROGRAM = "off"
 
 from sidepulse.led_status import (
     DEFAULT_FILE_NAME,
+    display_state_for_mode,
+    led_count_for_target,
+    program_for_display_state,
     resolve_target_path,
     write_led_program,
-    write_mode_to_leds,
 )
 from sidepulse.models import AgentMode
 
@@ -196,6 +206,35 @@ def leds_should_be_dark() -> bool:
     return False
 
 
+def read_program(target: Path) -> str | None:
+    """Current LEDS.LED contents, or None when unreadable."""
+    try:
+        return target.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+
+
+def brightness_bucket(ratio: float) -> int:
+    return int(round(ratio / BRIGHTNESS_BUCKET))
+
+
+def device_uptime_ms() -> int | None:
+    """Device uptime from STATUS.TXT. A drop means the device power-cycled."""
+    try:
+        text = Path("/Volumes/SidePulse/STATUS.TXT").read_text(
+            encoding="utf-8", errors="replace"
+        )
+    except OSError:
+        return None
+    for line in text.splitlines():
+        if line.startswith("uptime_ms "):
+            try:
+                return int(line.split()[1])
+            except (IndexError, ValueError):
+                return None
+    return None
+
+
 def main() -> int:
     current_mode: AgentMode = AgentMode.IDLE_READY
     brightness_ratio: float | None = system_brightness_ratio()
@@ -206,6 +245,7 @@ def main() -> int:
     last_retry_at = 0.0
     last_event_at = time.monotonic()
     last_device_seen = device_present()
+    last_uptime_ms = device_uptime_ms()
     leds_hidden = False
     last_presence_check = 0.0
     pending_mode: AgentMode | None = None
@@ -217,7 +257,24 @@ def main() -> int:
             return
         led_brightness = max(0, min(255, int(round(brightness_ratio * 255))))
         try:
-            write_mode_to_leds(mode, brightness=led_brightness)
+            target = resolve_target_path(device_path=None, file_name=DEFAULT_FILE_NAME)
+            if mode == AgentMode.IDLE_READY:
+                program = IDLE_PROGRAM
+            else:
+                program = program_for_display_state(
+                    display_state_for_mode(mode),
+                    led_count=led_count_for_target(Path(DEVICE_LED_FILE)),
+                    brightness=led_brightness,
+                )
+            # Skip byte-identical rewrites: every write restarts the animation
+            # from line 1, which is visible as a stutter even when the target
+            # program is the same.
+            if read_program(target) == program:
+                written_ok = True
+                return
+            write_led_program(
+                program, device_path=target.parent, file_name=DEFAULT_FILE_NAME
+            )
             log(f"leds={mode.value} bright={led_brightness} ({round(brightness_ratio * 100)}%)")
             written_ok = True
         except Exception as exc:
@@ -401,12 +458,11 @@ def main() -> int:
             if present and now - last_brightness_at >= 1.0:
                 last_brightness_at = now
                 ratio = system_brightness_ratio()
-                if ratio is not None:
-                    brightness_changed = abs(ratio - brightness_ratio) >= 0.03
+                if ratio is not None and (
+                    brightness_bucket(ratio) != brightness_bucket(brightness_ratio)
+                ):
                     brightness_ratio = ratio
-                    if brightness_changed and not (
-                        current_mode == AgentMode.IDLE_READY and not written_ok
-                    ):
+                    if not (current_mode == AgentMode.IDLE_READY and not written_ok):
                         write_current(current_mode)
 
             # Flush a debounced mode change once the hold window has passed.
@@ -446,6 +502,22 @@ def main() -> int:
                     last_keepalive = now
                 except Exception:
                     pass
+
+                # The reader power-cycles the device (idle timeout, sleep/wake).
+                # Each power-up replays the startup program, so log the reboot
+                # that would otherwise show up as an unexplained flash.
+                uptime = device_uptime_ms()
+                if (
+                    uptime is not None
+                    and last_uptime_ms is not None
+                    and uptime < last_uptime_ms
+                ):
+                    log(
+                        f"device rebooted (uptime {last_uptime_ms} -> {uptime} ms); "
+                        "startup program is dark"
+                    )
+                if uptime is not None:
+                    last_uptime_ms = uptime
     except KeyboardInterrupt:
         pass
     return 0
