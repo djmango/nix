@@ -70,6 +70,11 @@ in
         GWS_SHIM_NAME=${lib.escapeShellArg cfg.name}
         export GWS_GATE_REAL GWS_SHIM_NAME
 
+        # The gate prints its own "send this way instead" text when this is unset.
+        # A caller could otherwise hand it a file of its own and have the refusal
+        # read as something true of this machine, so drop what it inherited.
+        unset GWS_GATE_HELP
+
         exec ${pkgs.bash}/bin/bash "$gate" "$@"
       '')
     ];
