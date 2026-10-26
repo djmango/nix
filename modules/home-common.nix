@@ -4,5 +4,6 @@
     ./home-base.nix
     ./home-darwin.nix
     ./home-linux-extras.nix
+    ./gws-read-only.nix
   ];
 }
