@@ -1,5 +1,5 @@
 # Shared Home Manager config: tool configs + cross-platform packages.
-{ pkgs, config, ... }:
+{ pkgs, lib, config, ... }:
 
 {
   imports = [
@@ -78,7 +78,6 @@
     gnused
     go
     graphviz
-    gws
     helix
     iamb
     imagemagick
@@ -110,5 +109,8 @@
     wget
     yt-dlp
     zola
-  ];
+  ]
+  # gws is installed by modules/gws-read-only.nix when that machine has a gate
+  # script; the bare package here would collide with the wrapper's name.
+  ++ lib.optionals (!config.gwsReadOnly.enable) [ pkgs.gws ];
 }
