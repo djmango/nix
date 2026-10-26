@@ -55,7 +55,7 @@
         pkgs = import nixpkgs {
           inherit system;
           config.allowUnfree = true;
-          overlays = [ bunOverlay ];
+          overlays = [ bunOverlay (import ./overlays/cloudflared.nix) ];
         };
         modules = [
           ./modules/home-common.nix
