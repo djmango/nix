@@ -17,28 +17,33 @@
       "aarch64-darwin" # Apple Silicon macOS
     ];
 
-    # nixpkgs is still on 1.3.13. The 1.3.14 bump (NixOS/nixpkgs#519796) is
-    # held as a draft over a NixOS `bun build --compile` ELF regression;
-    # omp.sh and similar installers require 1.3.14+.
+    # The galatea tree declares bun 1.4.2 (package.json `packageManager` +
+    # `engines.bun`) and 13 of its 27 committed lockfiles are `lockfileVersion:
+    # 2`, which a 1.3 bun cannot parse at all ("Unknown lockfile version", then
+    # "lockfile had changes, but lockfile is frozen"). nixpkgs lags at 1.3.13
+    # (the 1.3.14 bump, NixOS/nixpkgs#519796, is held as a draft over a NixOS
+    # `bun build --compile` ELF regression), so pin the release the tree asks
+    # for here. The hold at 1.3.14 existed because omp.sh and similar installers
+    # require 1.3.14+, which 1.4.2 satisfies too.
     bunOverlay = final: prev:
       let
-        version = "1.3.14";
+        version = "1.4.2";
         sources = {
           aarch64-darwin = prev.fetchurl {
             url = "https://github.com/oven-sh/bun/releases/download/bun-v${version}/bun-darwin-aarch64.zip";
-            hash = "sha256-2LliIYKK1vl6x6wKt+lYcjQa92MAHogD6CZ2UsJlJiA=";
+            hash = "sha256-kJh6OhbX21VtiGrD1VHnttPt8KHPQ6yu1iLoZ2vh0S8=";
           };
           aarch64-linux = prev.fetchurl {
             url = "https://github.com/oven-sh/bun/releases/download/bun-v${version}/bun-linux-aarch64.zip";
-            hash = "sha256-on/7Y6gxA3WDbg1vZorhf6jY0YuIw3yCHGUzGXOhmjs=";
+            hash = "sha256-VDKLvC2cjgyfiSxUTWbFeoO4QTnjSQnl7oF1jxrI/ac=";
           };
           x86_64-darwin = prev.fetchurl {
             url = "https://github.com/oven-sh/bun/releases/download/bun-v${version}/bun-darwin-x64-baseline.zip";
-            hash = "sha256-PjWtb1OXGpg0v55nhuKt9ytfGSHMmpxf3gc9KXKUQHY=";
+            hash = "sha256-utW71s8U0JgNEV9ZVMn/kE32GdXplNLaH/zNPzFjALA=";
           };
           x86_64-linux = prev.fetchurl {
             url = "https://github.com/oven-sh/bun/releases/download/bun-v${version}/bun-linux-x64.zip";
-            hash = "sha256-lR7iruhV8IWVruxiJSJqKY0/6oOj3NZGXAnLzN9+hI8=";
+            hash = "sha256-NjaPrvdSeHXV/6UuU81IAhdB8qg+tiCKjdZAaNQiqRM=";
           };
         };
       in {
