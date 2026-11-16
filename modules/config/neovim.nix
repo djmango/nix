@@ -17,7 +17,21 @@
 
     # Set up the configuration files
     initLua = ''
-      -- Use system clipboard
+      -- Clipboard. Use the OS clipboard helper when one exists: pbcopy on macOS,
+      -- wl-copy/xclip on a desktop Linux, tmux inside a tmux session. A host with
+      -- none of those (a server reached over SSH) falls back to OSC 52, which
+      -- hands the clipboard to the terminal itself. Without that fallback every
+      -- yank there fails with "clipboard: No provider".
+      local clipboard_helper =
+        vim.fn.executable("pbcopy") == 1
+        or (vim.env.WAYLAND_DISPLAY and (vim.fn.executable("wl-copy") == 1 or vim.fn.executable("waycopy") == 1))
+        or (vim.env.DISPLAY and (vim.fn.executable("xclip") == 1 or vim.fn.executable("xsel") == 1))
+        or (vim.env.TMUX and vim.fn.executable("tmux") == 1)
+
+      if not clipboard_helper then
+        vim.g.clipboard = "osc52"
+      end
+
       vim.opt.clipboard:append("unnamedplus")
 
       -- Make j and k move through visual lines instead of physical lines
