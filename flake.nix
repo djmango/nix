@@ -60,7 +60,7 @@
         pkgs = import nixpkgs {
           inherit system;
           config.allowUnfree = true;
-          overlays = [ bunOverlay (import ./overlays/cloudflared.nix) ];
+          overlays = [ bunOverlay (import ./overlays/cloudflared.nix) (import ./overlays/btop.nix) ];
         };
         modules = [
           ./modules/home-common.nix
